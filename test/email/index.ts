@@ -1,13 +1,18 @@
-import { Options, Plugin, builder } from '../../src'
+import { Options, Plugin, Types, builder } from '../../src'
 import {
   ActionBody,
-  ActionPlugin,
   ActionSend,
   ActionSubject,
   ActionTo,
-  Settings,
-  Types
+  SYMBOL_BODY,
+  SYMBOL_SEND,
+  SYMBOL_SUBJECT,
+  SYMBOL_TO,
+  Settings
 } from './types'
+
+import { ActionPlugin, SYMBOL_PLUGIN } from './plugin'
+
 import { filter, find, flatten, get, isString, map } from 'lodash'
 
 export { attachment } from './attachment'
@@ -15,59 +20,56 @@ export { cc } from './cc'
 
 export const email = builder<Settings>([
   {
-    [Options.Type]: Types.To,
+    [Options.Type]: SYMBOL_TO,
     [Options.Once]: true,
     [Options.Keys]: ['to'],
     [Options.Reducer]: log => ({
-      to: get(find(log, action => action.type === Types.To), 'payload')
+      to: get(find(log, action => action.type === SYMBOL_TO), 'payload')
     }),
     [Options.Interface]: dispatch => ({
       to<T extends string>(value: T) {
-        return dispatch<ActionTo<T>>({ type: Types.To, payload: value })
+        return dispatch<ActionTo<T>>({ type: SYMBOL_TO, payload: value })
       }
     })
   },
   {
-    [Options.Type]: Types.Subject,
+    [Options.Type]: SYMBOL_SUBJECT,
     [Options.Once]: true,
     [Options.Keys]: ['subject'],
-    [Options.Dependencies]: [Types.To],
+    [Options.Dependencies]: [SYMBOL_TO],
     [Options.Reducer]: log => ({
-      subject: get(
-        find(log, action => action.type === Types.Subject),
-        'payload'
-      )
+      subject: get(find(log, action => action.type === SYMBOL_SUBJECT), 'payload')
     }),
     [Options.Interface]: dispatch => ({
       subject<T extends string>(value: T) {
         return dispatch<ActionSubject<T>>({
-          type: Types.Subject,
+          type: SYMBOL_SUBJECT,
           payload: value
         })
       }
     })
   },
   {
-    [Options.Type]: Types.Body,
+    [Options.Type]: SYMBOL_BODY,
     [Options.Once]: true,
     [Options.Keys]: ['body'],
-    [Options.Dependencies]: [Types.To, Types.Subject],
+    [Options.Dependencies]: [SYMBOL_TO, SYMBOL_SUBJECT],
     [Options.Reducer]: log => ({
-      body: get(find(log, action => action.type === Types.Body), 'payload')
+      body: get(find(log, action => action.type === SYMBOL_BODY), 'payload')
     }),
     [Options.Interface]: dispatch => ({
       body<T extends string>(value: T) {
-        return dispatch<ActionBody<T>>({ type: Types.Body, payload: value })
+        return dispatch<ActionBody<T>>({ type: SYMBOL_BODY, payload: value })
       }
     })
   },
   {
-    [Options.Type]: Types.Send,
+    [Options.Type]: SYMBOL_SEND,
     [Options.Once]: true,
     [Options.Keys]: ['send'],
     [Options.Reducer]: log => ({
       sent: get(
-        find(log, action => action.type === Types.Send),
+        find(log, action => action.type === SYMBOL_SEND),
         'payload',
         false
       )
@@ -75,29 +77,27 @@ export const email = builder<Settings>([
     [Options.Enabled]: (_, state) => isString(state.body),
     [Options.Interface]: dispatch => ({
       send() {
-        return dispatch<ActionSend>({ type: Types.Send, payload: true })
+        return dispatch<ActionSend>({ type: SYMBOL_SEND, payload: true })
       }
     })
   },
   {
-    [Options.Type]: 'Plugin' as Types.Plugin,
+    [Options.Type]: SYMBOL_PLUGIN,
     [Options.Once]: false,
     [Options.Keys]: ['plugin'],
-    [Options.Conflicts]: [Types.Send],
+    [Options.Conflicts]: [SYMBOL_SEND],
     [Options.Reducer]: log => ({
       plugins: flatten(
         map(
-          filter(log, action => action.type === 'Plugin' as Types.Plugin),
+          filter(log, action => action.type === SYMBOL_PLUGIN),
           action => action.payload
         )
       )
     }),
     [Options.Interface]: dispatch => ({
-      plugin<T extends Types.CC | Types.Attachment>(
-        ...plugins: Plugin<T, Settings>[]
-      ) {
+      plugin<T extends Types<Settings>>(...plugins: Plugin<T, Settings>[]) {
         return dispatch<ActionPlugin<T[]>>(
-          { type: 'Plugin' as Types.Plugin, payload: map(plugins, p => p[Options.Type]) },
+          { type: SYMBOL_PLUGIN, payload: map(plugins, p => p[Options.Type]) },
           ...plugins
         )
       }

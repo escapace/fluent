@@ -1,21 +1,19 @@
-import { Types } from './types'
-
 import $ from '@escapace/typelevel'
 
-import { Action, Model, Next, Options, Payload, Plugin } from '../../src'
+import { Action, Model, Next, Options, Payload, Plugin, Types } from '../../src'
 
-export interface ActionPlugin<T extends Types[]> {
-  type: Types.Plugin
+import { SYMBOL_SEND, Settings } from './types'
+
+export const SYMBOL_PLUGIN = Symbol.for('Plugin')
+
+export interface ActionPlugin<T extends Types<Settings>[]> {
+  type: typeof SYMBOL_PLUGIN
   payload: T
 }
 
 declare module './types' {
-  enum Types {
-    Plugin = 'Plugin'
-  }
-
   export interface State {
-    plugins: Types[]
+    plugins: Types<Settings>[]
   }
 
   export interface INITIAL_STATE {
@@ -23,23 +21,41 @@ declare module './types' {
   }
 
   export interface Email<T> {
-    plugin<U extends Types>(...payload: Plugin<U, Settings>[]): Next<Settings, T, ActionPlugin<U[]>>
+    plugin<A extends Types<Settings>, B extends Types<Settings>>(
+      A: Plugin<A, Settings>,
+      B: Plugin<B, Settings>
+    ): Next<Settings, T, ActionPlugin<Array<A | B>>>
+
+    plugin<A extends Types<Settings>, B extends Types<Settings>, C extends Types<Settings>>(
+      A: Plugin<A, Settings>,
+      B: Plugin<B, Settings>,
+      C: Plugin<C, Settings>
+    ): Next<Settings, T, ActionPlugin<Array<A | B | C>>>
+
+    plugin<A extends Types<Settings>, B extends Types<Settings>, C extends Types<Settings>, D extends Types<Settings>>(
+      A: Plugin<A, Settings>,
+      B: Plugin<B, Settings>,
+      C: Plugin<C, Settings>,
+      D: Plugin<D, Settings>
+    ): Next<Settings, T, ActionPlugin<Array<A | B | C | D>>>
+
+    plugin<U extends Types<Settings>>(
+      ...payload: Plugin<U, Settings>[]
+    ): Next<Settings, T, ActionPlugin<U[]>>
   }
 
   export interface Reducer<T extends Action> {
-    [Types.Plugin]: { plugins: Array<$.Values<Payload<T, Types.Plugin>>> }
+    [SYMBOL_PLUGIN]: { plugins: Array<$.Values<Payload<T, typeof SYMBOL_PLUGIN>>> }
   }
 
-  export interface Category<
-    T extends Model<State>
-  > {
-    [Types.Plugin]: {
-      [Options.Type]: Types.Plugin
+  export interface Category<T extends Model<State>> {
+    [SYMBOL_PLUGIN]: {
+      [Options.Type]: typeof SYMBOL_PLUGIN
       [Options.Once]: $.False
       [Options.Dependencies]: never
       [Options.Keys]: 'plugin'
       [Options.Enabled]: $.True
-      [Options.Conflicts]: Types.Send
+      [Options.Conflicts]: typeof SYMBOL_SEND
     }
   }
 }

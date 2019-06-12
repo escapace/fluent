@@ -9,37 +9,33 @@ import {
   Options,
   Payload
 } from '../../src'
-// tslint:disable-next-line: no-circular-imports
-export { ActionPlugin } from './plugin'
 
 export declare const EMAIL_INTERFACE: unique symbol
 export declare const EMAIL_CATEGORY: unique symbol
 export declare const EMAIL_REDUCER: unique symbol
 
-export enum Types {
-  To = 'To',
-  Subject = 'Subject',
-  Body = 'Body',
-  Send = 'Send'
-}
+export const SYMBOL_TO = Symbol.for('To')
+export const SYMBOL_SUBJECT = Symbol.for('Subject')
+export const SYMBOL_BODY = Symbol.for('Body')
+export const SYMBOL_SEND = Symbol.for('Send')
 
 export interface ActionTo<T extends string> {
-  type: Types.To
+  type: typeof SYMBOL_TO
   payload: T
 }
 
 export interface ActionSubject<T extends string> {
-  type: Types.Subject
+  type: typeof SYMBOL_SUBJECT
   payload: T
 }
 
 export interface ActionBody<T extends string> {
-  type: Types.Body
+  type: typeof SYMBOL_BODY
   payload: T
 }
 
 export interface ActionSend {
-  type: Types.Send
+  type: typeof SYMBOL_SEND
   payload: true
 }
 
@@ -61,8 +57,8 @@ export interface Email<T extends Model<State>> extends FluentInterface<T> {
 }
 
 export interface Category<T extends Model<State>> {
-  [Types.To]: {
-    [Options.Type]: Types.To
+  [SYMBOL_TO]: {
+    [Options.Type]: typeof SYMBOL_TO
     [Options.Once]: $.True
     [Options.Dependencies]: never
     [Options.Keys]: 'to'
@@ -70,26 +66,26 @@ export interface Category<T extends Model<State>> {
     [Options.Conflicts]: never
   }
 
-  [Types.Subject]: {
-    [Options.Type]: Types.Subject
+  [SYMBOL_SUBJECT]: {
+    [Options.Type]: typeof SYMBOL_SUBJECT
     [Options.Once]: $.True
-    [Options.Dependencies]: Types.To
+    [Options.Dependencies]: typeof SYMBOL_TO
     [Options.Keys]: 'subject'
     [Options.Enabled]: $.True
     [Options.Conflicts]: never
   }
 
-  [Types.Body]: {
-    [Options.Type]: Types.Body
+  [SYMBOL_BODY]: {
+    [Options.Type]: typeof SYMBOL_BODY
     [Options.Once]: $.True
-    [Options.Dependencies]: Types.To | Types.Subject
+    [Options.Dependencies]: typeof SYMBOL_TO | typeof SYMBOL_SUBJECT
     [Options.Keys]: 'body'
     [Options.Enabled]: $.True
     [Options.Conflicts]: never
   }
 
-  [Types.Send]: {
-    [Options.Type]: Types.Send
+  [SYMBOL_SEND]: {
+    [Options.Type]: typeof SYMBOL_SEND
     [Options.Once]: $.True
     [Options.Dependencies]: never
     [Options.Keys]: 'send'
@@ -99,10 +95,10 @@ export interface Category<T extends Model<State>> {
 }
 
 export interface Reducer<T extends Action> {
-  [Types.To]: { to: Payload<T, Types.To> }
-  [Types.Subject]: { subject: Payload<T, Types.Subject> }
-  [Types.Body]: { body: Payload<T, Types.Body> }
-  [Types.Send]: { sent: Payload<T, Types.Send> }
+  [SYMBOL_TO]: { to: Payload<T, typeof SYMBOL_TO> }
+  [SYMBOL_SUBJECT]: { subject: Payload<T, typeof SYMBOL_SUBJECT> }
+  [SYMBOL_BODY]: { body: Payload<T, typeof SYMBOL_BODY> }
+  [SYMBOL_SEND]: { sent: Payload<T, typeof SYMBOL_SEND> }
 }
 
 export interface INITIAL_STATE {

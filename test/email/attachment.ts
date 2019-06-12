@@ -1,4 +1,4 @@
-import { Settings, Types } from './types'
+import { SYMBOL_SUBJECT, Settings } from './types'
 
 import $ from '@escapace/typelevel'
 
@@ -6,48 +6,45 @@ import { Model, Next, Options, Plugin } from '../../src'
 
 import { includes } from 'lodash'
 
+export const SYMBOL_ATTACHMENT = Symbol.for('Attachment')
+
 export interface ActionAttachment {
-  type: Types.Attachment
+  type: typeof SYMBOL_ATTACHMENT
   payload: Buffer
 }
 
 declare module './types' {
-  enum Types {
-    Attachment = 'Attachment'
-  }
-
   export interface Email<T> {
-    attachment(
-      payload: Buffer
-    ): Next<Settings, T, ActionAttachment>
+    attachment(payload: Buffer): Next<Settings, T, ActionAttachment>
   }
 
-  export interface Category<
-    T extends Model<State>
-  > {
-    [Types.Attachment]: {
-      [Options.Type]: Types.Attachment
+  export interface Category<T extends Model<State>> {
+    [SYMBOL_ATTACHMENT]: {
+      [Options.Type]: typeof SYMBOL_ATTACHMENT
       [Options.Once]: $.False
-      [Options.Dependencies]: Types.Subject
+      [Options.Dependencies]: typeof SYMBOL_SUBJECT
       [Options.Keys]: 'attachment'
       [Options.Enabled]: $.Contains<
         $.Values<T['state']['plugins']>,
-        Types.Attachment
+        typeof SYMBOL_ATTACHMENT
       >
-      [Options.Conflicts]: Types.Send
+      [Options.Conflicts]: typeof SYMBOL_SEND
     }
   }
 }
 
-export const attachment: Plugin<Types.Attachment, Settings> = {
-    [Options.Type]: 'Attachment' as Types.Attachment,
-    [Options.Once]: false,
-    [Options.Keys]: ['attachment'],
-    [Options.Dependencies]: [Types.Subject],
-    [Options.Enabled]: (_, state) => includes(state.plugins, 'Attachment' as Types.Attachment),
-    [Options.Interface]: dispatch => ({
-      attachment(value: Buffer) {
-        return dispatch<ActionAttachment>({ type: 'Attachment' as Types.Attachment, payload: value })
-      }
-    })
-  }
+export const attachment: Plugin<typeof SYMBOL_ATTACHMENT, Settings> = {
+  [Options.Type]: SYMBOL_ATTACHMENT,
+  [Options.Once]: false,
+  [Options.Keys]: ['attachment'],
+  [Options.Dependencies]: [SYMBOL_SUBJECT],
+  [Options.Enabled]: (_, state) => includes(state.plugins, SYMBOL_ATTACHMENT),
+  [Options.Interface]: dispatch => ({
+    attachment(value: Buffer) {
+      return dispatch<ActionAttachment>({
+        type: SYMBOL_ATTACHMENT,
+        payload: value
+      })
+    }
+  })
+}

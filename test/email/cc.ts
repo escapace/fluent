@@ -1,4 +1,4 @@
-import { Settings, Types } from './types'
+import { SYMBOL_TO, Settings } from './types'
 
 import $ from '@escapace/typelevel'
 
@@ -6,15 +6,17 @@ import { Action, Model, Next, Options, Payload, Plugin } from '../../src'
 
 import { filter, includes, map } from 'lodash'
 
+export const SYMBOL_CC = Symbol.for('CC')
+
 export interface ActionCC<T extends string> {
-  type: Types.CC
+  type: typeof SYMBOL_CC
   payload: T
 }
 
 declare module './types' {
-  enum Types {
-    CC = 'CC'
-  }
+  // enum Types {
+  //   CC = 'CC'
+  // }
 
   export interface State {
     cc: string[] | undefined
@@ -29,56 +31,37 @@ declare module './types' {
   }
 
   export interface Reducer<T extends Action> {
-    [Types.CC]: { cc: Array<Payload<T, Types.CC>> | undefined }
+    [SYMBOL_CC]: { cc: Array<Payload<T, typeof SYMBOL_CC>> | undefined }
   }
 
   export interface Category<
     T extends Model<State>
   > {
-    [Types.CC]: {
-      [Options.Type]: Types.CC
+    [SYMBOL_CC]: {
+      [Options.Type]: typeof SYMBOL_CC
       [Options.Once]: $.False
-      [Options.Dependencies]: Types.To
+      [Options.Dependencies]: typeof SYMBOL_TO
       [Options.Keys]: 'cc'
-      [Options.Enabled]: $.Contains<$.Values<T['state']['plugins']>, Types.CC>
-      [Options.Conflicts]: Types.Send
+      [Options.Enabled]: $.Contains<$.Values<T['state']['plugins']>, typeof SYMBOL_CC>
+      [Options.Conflicts]: typeof SYMBOL_SEND
     }
   }
 }
 
-// export const cc: Plugin<Settings> = {
-//   [Options.Type]: Types.CC,
-//   [Options.Once]: false,
-//   [Options.Interface]: {
-//     cc() {}
-//   },
-//   [Options.Keys]: ['cc'],
-//   [Options.Dependencies]: [Types.To],
-//   [Options.Enabled]: (_, state) => includes(state.plugins, Types.CC),
-//   [Options.Conflicts]: [Types.Send],
-//   [Options.State]: { cc: [] },
-//   [Options.Reducer]: log => ({
-//     cc: map(
-//       filter(log, action => action.type === Types.CC),
-//       action => action.payload
-//     )
-//   })
-// }
-
-export const cc: Plugin<Types.CC, Settings> = {
-    [Options.Type]: 'CC' as Types.CC,
+export const cc: Plugin<typeof SYMBOL_CC, Settings> = {
+    [Options.Type]: SYMBOL_CC,
     [Options.Once]: false,
     [Options.Keys]: ['cc'],
-    [Options.Dependencies]: [Types.To],
-    [Options.Enabled]: (_, state) => includes(state.plugins, 'CC' as Types.CC),
+    [Options.Dependencies]: [SYMBOL_TO],
+    [Options.Enabled]: (_, state) => includes(state.plugins, SYMBOL_CC),
     [Options.Interface]: dispatch => ({
       cc<T extends string>(value: T) {
-        return dispatch<ActionCC<T>>({ type: 'CC' as Types.CC, payload: value })
+        return dispatch<ActionCC<T>>({ type: SYMBOL_CC, payload: value })
       }
     }),
     [Options.Reducer]: log => ({
       cc: map(
-          filter(log, action => action.type === 'CC' as Types.CC),
+          filter(log, action => action.type === SYMBOL_CC),
           action => action.payload
         )
     })
