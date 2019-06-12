@@ -1,16 +1,19 @@
 import { attachment, cc, email } from './email'
 import {
   ActionBody,
-  ActionPlugin,
   ActionSend,
   ActionSubject,
   ActionTo,
   INITIAL_STATE,
-  Types
+  SYMBOL_BODY,
+  SYMBOL_SEND,
+  SYMBOL_SUBJECT,
+  SYMBOL_TO
 } from './email/types'
 
-import { ActionCC } from './email/cc'
-import { ActionAttachment } from './email/attachment'
+import { ActionCC, SYMBOL_CC } from './email/cc'
+import { ActionAttachment, SYMBOL_ATTACHMENT } from './email/attachment'
+import { ActionPlugin, SYMBOL_PLUGIN } from './email/plugin'
 
 import { TL } from '@escapace/typelevel'
 
@@ -56,7 +59,7 @@ describe('email', () => {
     assert.isFunction(test.subject)
     assert.lengthOf(_log, 1)
     assert.deepInclude(_log, {
-      type: Types.To,
+      type: SYMBOL_TO,
       payload: 'john.doe@example.com'
     })
     assert.deepEqual(_state, {
@@ -86,7 +89,7 @@ describe('email', () => {
     assert.isFunction(test.body)
     assert.lengthOf(_log, 2)
     assert.deepInclude(_log, {
-      type: Types.Subject,
+      type: SYMBOL_SUBJECT,
       payload: 'Hello World'
     })
     assert.deepEqual(_state, {
@@ -125,7 +128,7 @@ describe('email', () => {
     assert.isFunction(test.send)
     assert.lengthOf(_log, 3)
     assert.deepInclude(_log, {
-      type: Types.Body,
+      type: SYMBOL_BODY,
       payload: 'Totam est perferendis provident consequatur et harum autem.'
     })
     assert.deepEqual(_state, {
@@ -166,7 +169,7 @@ describe('email', () => {
     assert.hasAllKeys(test, [SYMBOL_LOG, SYMBOL_STATE])
     assert.lengthOf(_log, 4)
     assert.deepInclude(_log, {
-      type: Types.Send,
+      type: SYMBOL_SEND,
       payload: true
     })
     assert.deepEqual(_state, {
@@ -207,7 +210,7 @@ describe('email', () => {
     assert.hasAllKeys(test, [SYMBOL_LOG, SYMBOL_STATE])
     assert.lengthOf(_log, 4)
     assert.deepInclude(_log, {
-      type: Types.Send,
+      type: SYMBOL_SEND,
       payload: true
     })
     assert.deepEqual(_state, {
@@ -232,7 +235,7 @@ describe('email', () => {
       | ActionBody<
           'Totam est perferendis provident consequatur et harum autem.'
         >
-      | ActionPlugin<Array<Types.CC | Types.Attachment>>
+      | ActionPlugin<Array<typeof SYMBOL_CC | typeof SYMBOL_ATTACHMENT>>
     > = log(test)
 
     const _state: TL.Assign<
@@ -241,7 +244,7 @@ describe('email', () => {
         to: 'john.doe@example.com'
         subject: 'Hello World'
         body: 'Totam est perferendis provident consequatur et harum autem.'
-        plugins: Array<Types.CC | Types.Attachment>
+        plugins: Array<typeof SYMBOL_CC | typeof SYMBOL_ATTACHMENT>
         cc: [] | undefined
       }
     > = state(test)
@@ -260,13 +263,13 @@ describe('email', () => {
     assert.isFunction(test.cc)
     assert.lengthOf(_log, 4)
     assert.deepInclude(_log, {
-      type: 'Plugin' as Types.Plugin,
-      payload: ['CC' as Types.CC, 'Attachment' as Types.Attachment]
+      type: SYMBOL_PLUGIN,
+      payload: [SYMBOL_CC, SYMBOL_ATTACHMENT]
     })
     assert.deepEqual(_state, {
       cc: [],
       body: 'Totam est perferendis provident consequatur et harum autem.',
-      plugins: ['CC' as Types.CC, 'Attachment' as Types.Attachment],
+      plugins: [SYMBOL_CC, SYMBOL_ATTACHMENT],
       sent: false,
       subject: 'Hello World',
       to: 'john.doe@example.com'
@@ -288,7 +291,7 @@ describe('email', () => {
       | ActionBody<
           'Totam est perferendis provident consequatur et harum autem.'
         >
-      | ActionPlugin<Array<Types.CC | Types.Attachment>>
+      | ActionPlugin<Array<typeof SYMBOL_CC | typeof SYMBOL_ATTACHMENT>>
       | ActionCC<'jane.doe@example.com'>
       | ActionCC<'justin.doe@example.com'>
     > = log(test)
@@ -299,7 +302,7 @@ describe('email', () => {
         to: 'john.doe@example.com'
         subject: 'Hello World'
         body: 'Totam est perferendis provident consequatur et harum autem.'
-        plugins: Array<Types.CC | Types.Attachment>
+        plugins: Array<typeof SYMBOL_CC | typeof SYMBOL_ATTACHMENT>
         cc: Array<'jane.doe@example.com' | 'justin.doe@example.com'> | undefined
       }
     > = state(test)
@@ -319,18 +322,18 @@ describe('email', () => {
     assert.lengthOf(_log, 6)
 
     assert.deepInclude(_log, {
-      type: 'CC' as Types.CC,
+      type: SYMBOL_CC,
       payload: 'jane.doe@example.com'
     })
 
     assert.deepInclude(_log, {
-      type: 'CC' as Types.CC,
+      type: SYMBOL_CC,
       payload: 'justin.doe@example.com'
     })
 
     assert.deepEqual(_state, {
       body: 'Totam est perferendis provident consequatur et harum autem.',
-      plugins: ['CC' as Types.CC, 'Attachment' as Types.Attachment],
+      plugins: [SYMBOL_CC, SYMBOL_ATTACHMENT],
       sent: false,
       subject: 'Hello World',
       to: 'john.doe@example.com',
@@ -356,7 +359,7 @@ describe('email', () => {
       | ActionBody<
           'Totam est perferendis provident consequatur et harum autem.'
         >
-      | ActionPlugin<Array<Types.CC | Types.Attachment>>
+      | ActionPlugin<Array<typeof SYMBOL_CC | typeof SYMBOL_ATTACHMENT>>
       | ActionAttachment
     > = log(test)
 
@@ -366,7 +369,7 @@ describe('email', () => {
         to: 'john.doe@example.com'
         subject: 'Hello World'
         body: 'Totam est perferendis provident consequatur et harum autem.'
-        plugins: Array<Types.CC | Types.Attachment>
+        plugins: Array<typeof SYMBOL_CC | typeof SYMBOL_ATTACHMENT>
         cc: [] | undefined
       }
     > = state(test)
@@ -387,19 +390,19 @@ describe('email', () => {
     assert.lengthOf(_log, 6)
 
     assert.deepInclude(_log, {
-      type: 'Attachment' as Types.Attachment,
+      type: SYMBOL_ATTACHMENT,
       payload: attachment1
     })
 
     assert.deepInclude(_log, {
-      type: 'Attachment' as Types.Attachment,
+      type: SYMBOL_ATTACHMENT,
       payload: attachment2
     })
 
     assert.deepEqual(_state, {
       cc: [],
       body: 'Totam est perferendis provident consequatur et harum autem.',
-      plugins: ['CC' as Types.CC, 'Attachment' as Types.Attachment],
+      plugins: [SYMBOL_CC, SYMBOL_ATTACHMENT],
       sent: false,
       subject: 'Hello World',
       to: 'john.doe@example.com'
@@ -407,16 +410,19 @@ describe('email', () => {
   })
 })
 
-// .plugin(Types.CC, Types.Attachment)
-// .attachment('Hello')
-// .attachment('Hello2')
-// .cc('1@example.com')
-// .cc('2@example.com')
-// .cc('3@example.com')
-// .cc('4@example.com')
-// .cc('5@example.com')
-// .cc('6@example.com')
-// .cc('7@example.com')
+// const qwe = email()
+//   .to('john.doe@example.com')
+//   .subject('hello')
+//   .body('hi john doe')
+//   .plugin(cc, attachment)
+//   .attachment(Buffer.from('Hi'))
+//   .cc('1@example.com')
+//   .cc('2@example.com')
+//   .cc('3@example.com')
+//   .cc('4@example.com')
+//   .cc('5@example.com')
+//   .cc('6@example.com')
+//   .cc('7@example.com')
 //   .cc('8@example.com')
 //   .cc('9@example.com')
 //   .cc('10@example.com')
@@ -451,40 +457,3 @@ describe('email', () => {
 //   .cc('35@example.com')
 //   .cc('35@example.com')
 //   .send()
-
-// const qwe  = email()
-//   .to('john.doe@example.com')
-//   .subject('hello')
-//   .body('hi john doe')
-//   .plugin(attachment)
-// .attachment('qweqweqwee1')
-// .attachment('qweqweqwee2')
-// .attachment('qweqweqwee3')
-// .attachment('qweqweqwee4')
-// .attachment('qweqweqwee5')
-// .attachment('qweqweqwee6')
-// .attachment('qweqweqwee7')
-// .attachment('qweqweqwee8')
-// .attachment('qweqweqwee9')
-// .attachment('qweqweqwee10')
-// .attachment('qweqweqwee11')
-// .attachment('qweqweqwee12')
-// .attachment('qweqweqwee13')
-// .attachment('qweqweqwee14')
-// .attachment('qweqweqwee15')
-// .attachment('qweqweqwee16')
-// .attachment('qweqweqwee17')
-// .attachment('qweqweqwee19')
-// .attachment('aqweqweqwee10')
-// .attachment('aqweqweqwee11')
-// .attachment('aqweqweqwee12')
-// .attachment('aqweqweqwee13')
-// .attachment('aqweqweqwee14')
-// .attachment('aqweqweqwee15')
-// .attachment('aqweqweqwee16')
-// .attachment('aqweqweqwee17')
-// .attachment('aqweqweqwee19')
-// .send()
-
-// console.log(newEmail)
-// console.log(newEmail2)
