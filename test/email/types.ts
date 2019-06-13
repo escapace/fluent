@@ -11,7 +11,7 @@ import {
 } from '../../src'
 
 export declare const EMAIL_INTERFACE: unique symbol
-export declare const EMAIL_CATEGORY: unique symbol
+export declare const EMAIL_SPECIFICATION: unique symbol
 export declare const EMAIL_REDUCER: unique symbol
 
 export const SYMBOL_TO = Symbol.for('To')
@@ -110,7 +110,7 @@ export interface InitialState {
 
 export interface Settings {
   [Options.Interface]: typeof EMAIL_INTERFACE
-  [Options.Category]: typeof EMAIL_CATEGORY
+  [Options.Specification]: typeof EMAIL_SPECIFICATION
   [Options.Reducer]: typeof EMAIL_REDUCER
   [Options.InitialState]: InitialState
   [Options.State]: State
@@ -119,7 +119,7 @@ export interface Settings {
 declare module '@escapace/typelevel/hkt' {
   interface URI2HKT<A> {
     [EMAIL_INTERFACE]: Email<$.Cast<A, Model<State>>>
-    [EMAIL_CATEGORY]: Category<$.Cast<A, Model<State>>>
+    [EMAIL_SPECIFICATION]: Category<$.Cast<A, Model<State>>>
     [EMAIL_REDUCER]: Reducer<$.Cast<A, Action>>
   }
 }
