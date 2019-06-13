@@ -2,17 +2,7 @@ import { assert } from 'chai'
 
 import { Options, builder } from '../src'
 
-import {
-  // ActionBody,
-  // ActionSend,
-  // ActionSubject,
-  // ActionTo,
-  SYMBOL_BODY,
-  SYMBOL_SEND,
-  SYMBOL_SUBJECT,
-  SYMBOL_TO,
-  Settings
-} from './email/types'
+import { SYMBOL_TO, Settings } from './email/types'
 
 import { noop } from 'lodash'
 
@@ -25,7 +15,7 @@ describe('failure-modes', () => {
           [Options.Once]: true,
           // [Options.Keys]: ['to'],
           [Options.Reducer]: () => ({}),
-          [Options.Interface]: dispatch => ({
+          [Options.Interface]: _ => ({
             noop() {
               noop()
             }
@@ -44,7 +34,7 @@ describe('failure-modes', () => {
           [Options.Once]: true,
           // [Options.Keys]: ['to'],
           [Options.Reducer]: () => ({}),
-          [Options.Interface]: dispatch => ({
+          [Options.Interface]: _ => ({
             noop() {
               noop()
             }
@@ -63,7 +53,7 @@ describe('failure-modes', () => {
           [Options.Once]: ('string' as unknown) as boolean,
           // [Options.Keys]: ['to'],
           [Options.Reducer]: () => ({}),
-          [Options.Interface]: dispatch => ({
+          [Options.Interface]: _ => ({
             noop() {
               noop()
             }
@@ -83,7 +73,7 @@ describe('failure-modes', () => {
           // tslint:disable-next-line: no-any
           [Options.Dependencies]: [noop] as any,
           [Options.Reducer]: () => ({}),
-          [Options.Interface]: dispatch => ({
+          [Options.Interface]: _ => ({
             noop() {
               noop()
             }
@@ -103,7 +93,7 @@ describe('failure-modes', () => {
           // tslint:disable-next-line: no-any
           [Options.Conflicts]: [noop] as any,
           [Options.Reducer]: () => ({}),
-          [Options.Interface]: dispatch => ({
+          [Options.Interface]: _ => ({
             noop() {
               noop()
             }
@@ -123,7 +113,7 @@ describe('failure-modes', () => {
           // tslint:disable-next-line: no-any
           [Options.Enabled]: 'string' as any,
           [Options.Reducer]: () => ({}),
-          [Options.Interface]: dispatch => ({
+          [Options.Interface]: _ => ({
             noop() {
               noop()
             }
@@ -142,7 +132,7 @@ describe('failure-modes', () => {
           [Options.Once]: true,
           // tslint:disable-next-line: no-any
           [Options.Reducer]: 'string' as any,
-          [Options.Interface]: dispatch => ({
+          [Options.Interface]: _ => ({
             noop() {
               noop()
             }
@@ -161,7 +151,7 @@ describe('failure-modes', () => {
           [Options.Once]: true,
           // tslint:disable-next-line: no-any
           [Options.InitialState]: noop as any,
-          [Options.Interface]: dispatch => ({
+          [Options.Interface]: _ => ({
             noop() {
               noop()
             }
