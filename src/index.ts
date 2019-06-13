@@ -211,13 +211,79 @@ class Lens<T extends Settings> {
     log: []
   }
 
+  public static normalizeRecords<T extends Settings>(
+    value: Plugin<Types<T>, T>[]
+  ): Required<Plugin<Types<T>, T>>[] {
+    const records: Required<Plugin<Types<T>, T>>[] = normalize(value)
+
+    forEach(records, record => {
+      if (!isType(record[Options.Type])) {
+        throw new Error('Not valid [Options.Type]')
+      }
+
+      if (!isBoolean(record[Options.Once])) {
+        throw new Error(
+          `Not valid [Options.Once] in the ${String(
+            record[Options.Type]
+          )} specification`
+        )
+      }
+
+      if (!every(record[Options.Dependencies], isType)) {
+        throw new Error(
+          `Not valid [Options.Dependencies] in the ${String(
+            record[Options.Type]
+          )} specification`
+        )
+      }
+
+      if (!every(record[Options.Conflicts], isType)) {
+        throw new Error(
+          `Not valid [Options.Conflicts] in the ${String(
+            record[Options.Type]
+          )} specification`
+        )
+      }
+
+      if (!isFunction(record[Options.Enabled])) {
+        throw new Error(
+          `Not valid [Options.Enabled] in the ${String(
+            record[Options.Type]
+          )} specification`
+        )
+      }
+
+      if (!isFunction(record[Options.Reducer])) {
+        throw new Error(
+          `Not valid [Options.Reducer] in the ${String(
+            record[Options.Type]
+          )} specification`
+        )
+      }
+
+      if (!isPlainObject(record[Options.InitialState])) {
+        throw new Error(
+          `Not valid [Options.InitialState] in the ${String(
+            record[Options.Type]
+          )} specification`
+        )
+      }
+    })
+
+    return records
+  }
+
   public dispatch(action?: Action, ...plugins: Plugin<Types<T>, T>[]) {
     if (plugins.length !== 0) {
-      this.register(plugins)
+      this.register(Lens.normalizeRecords(plugins))
     }
 
     if (!isUndefined(action)) {
-      this.state.log.unshift(action)
+      if (isPlainObject(action) && isType(action.type)) {
+        this.state.log.unshift(action)
+      } else {
+        throw new Error(`Invalid FSA type`)
+      }
     }
 
     this.setState()
@@ -225,10 +291,8 @@ class Lens<T extends Settings> {
     return this.interfaces()
   }
 
-  public register(records: Plugin<Types<T>, T>[]) {
-    const newRecords: Required<Plugin<Types<T>, T>>[] = normalize(records)
-
-    this.setRecords(newRecords)
+  public register(records: Required<Plugin<Types<T>, T>>[]) {
+    this.setRecords(records)
 
     this.state.initialState = assign(
       {},
@@ -291,46 +355,6 @@ class Lens<T extends Settings> {
   }
 
   private setRecords(records: Required<Plugin<Types<T>, T>>[]) {
-    forEach(records, record => {
-      if (!isType(record[Options.Type])) {
-        throw new Error(`${record[Options.Type]} is not valid [Options.Type]`)
-      }
-
-      if (!isBoolean(record[Options.Once])) {
-        throw new Error(`${record[Options.Type]} is not valid [Options.Once]`)
-      }
-
-      if (!every(record[Options.Dependencies], isType)) {
-        throw new Error(
-          `${record[Options.Dependencies]} is not valid [Options.Dependencies]`
-        )
-      }
-
-      if (!every(record[Options.Conflicts], isType)) {
-        throw new Error(
-          `${record[Options.Dependencies]} is not valid [Options.Conflicts]`
-        )
-      }
-
-      if (!isFunction(record[Options.Enabled])) {
-        throw new Error(
-          `${record[Options.Enabled]} is not valid [Options.Enabled]`
-        )
-      }
-
-      if (!isFunction(record[Options.Reducer])) {
-        throw new Error(
-          `${record[Options.Reducer]} is not valid [Options.Reducer]`
-        )
-      }
-
-      if (!isPlainObject(record[Options.InitialState])) {
-        throw new Error(
-          `${record[Options.InitialState]} is not valid [Options.InitialState]`
-        )
-      }
-    })
-
     const filteredRecords = differenceWith(
       this.state.records,
       records,
@@ -345,9 +369,12 @@ class Lens<T extends Settings> {
 export const builder = <T extends Settings>(
   value: Plugin<Types<T>, T>[]
 ): (() => Next<T>) => {
+  const normalized = Lens.normalizeRecords(value)
+
   return () => {
     const lens = new Lens<T>()
-    lens.register(value)
+
+    lens.register(normalized)
 
     return lens.dispatch() as Next<T>
   }
