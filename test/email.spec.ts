@@ -4,7 +4,7 @@ import {
   ActionSend,
   ActionSubject,
   ActionTo,
-  INITIAL_STATE,
+  InitialState,
   SYMBOL_BODY,
   SYMBOL_SEND,
   SYMBOL_SUBJECT,
@@ -30,7 +30,7 @@ describe('email', () => {
     const test = email()
 
     const _log: never[] = log(test)
-    const _state: INITIAL_STATE = state(test)
+    const _state: InitialState = state(test)
 
     assert.isObject(test)
     assert.hasAllKeys(test, ['to', 'plugin', SYMBOL_LOG, SYMBOL_STATE])
@@ -50,7 +50,7 @@ describe('email', () => {
 
     const _log: Array<ActionTo<'john.doe@example.com'>> = log(test)
     const _state: TL.Assign<
-      INITIAL_STATE,
+      InitialState,
       { to: 'john.doe@example.com' }
     > = state(test)
 
@@ -80,7 +80,7 @@ describe('email', () => {
       ActionTo<'john.doe@example.com'> | ActionSubject<'Hello World'>
     > = log(test)
     const _state: TL.Assign<
-      INITIAL_STATE,
+      InitialState,
       { to: 'john.doe@example.com'; subject: 'Hello World' }
     > = state(test)
 
@@ -115,7 +115,7 @@ describe('email', () => {
         >
     > = log(test)
     const _state: TL.Assign<
-      INITIAL_STATE,
+      InitialState,
       {
         to: 'john.doe@example.com'
         subject: 'Hello World'
@@ -156,7 +156,7 @@ describe('email', () => {
       | ActionSend
     > = log(test)
     const _state: TL.Assign<
-      INITIAL_STATE,
+      InitialState,
       {
         to: 'john.doe@example.com'
         subject: 'Hello World'
@@ -197,7 +197,7 @@ describe('email', () => {
       | ActionSend
     > = log(test)
     const _state: TL.Assign<
-      INITIAL_STATE,
+      InitialState,
       {
         to: 'john.doe@example.com'
         subject: 'Hello World'
@@ -239,7 +239,7 @@ describe('email', () => {
     > = log(test)
 
     const _state: TL.Assign<
-      INITIAL_STATE,
+      InitialState,
       {
         to: 'john.doe@example.com'
         subject: 'Hello World'
@@ -297,7 +297,7 @@ describe('email', () => {
     > = log(test)
 
     const _state: TL.Assign<
-      INITIAL_STATE,
+      InitialState,
       {
         to: 'john.doe@example.com'
         subject: 'Hello World'
@@ -364,7 +364,7 @@ describe('email', () => {
     > = log(test)
 
     const _state: TL.Assign<
-      INITIAL_STATE,
+      InitialState,
       {
         to: 'john.doe@example.com'
         subject: 'Hello World'
