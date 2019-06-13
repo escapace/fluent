@@ -1,3 +1,5 @@
+/* tslint:disable: no-unsafe-any */
+
 import { Options, Plugin, Types, builder } from '../../src'
 import {
   ActionBody,
@@ -38,7 +40,10 @@ export const email = builder<Settings>([
     [Options.Keys]: ['subject'],
     [Options.Dependencies]: [SYMBOL_TO],
     [Options.Reducer]: log => ({
-      subject: get(find(log, action => action.type === SYMBOL_SUBJECT), 'payload')
+      subject: get(
+        find(log, action => action.type === SYMBOL_SUBJECT),
+        'payload'
+      )
     }),
     [Options.Interface]: dispatch => ({
       subject<T extends string>(value: T) {

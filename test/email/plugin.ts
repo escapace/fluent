@@ -2,7 +2,7 @@ import $ from '@escapace/typelevel'
 
 import { Action, Model, Next, Options, Payload, Plugin, Types } from '../../src'
 
-import { SYMBOL_SEND, Settings } from './types'
+import { Settings } from './types'
 
 export const SYMBOL_PLUGIN = Symbol.for('Plugin')
 
@@ -16,7 +16,7 @@ declare module './types' {
     plugins: Types<Settings>[]
   }
 
-  export interface INITIAL_STATE {
+  export interface InitialState {
     plugins: []
   }
 
@@ -26,13 +26,22 @@ declare module './types' {
       B: Plugin<B, Settings>
     ): Next<Settings, T, ActionPlugin<Array<A | B>>>
 
-    plugin<A extends Types<Settings>, B extends Types<Settings>, C extends Types<Settings>>(
+    plugin<
+      A extends Types<Settings>,
+      B extends Types<Settings>,
+      C extends Types<Settings>
+    >(
       A: Plugin<A, Settings>,
       B: Plugin<B, Settings>,
       C: Plugin<C, Settings>
     ): Next<Settings, T, ActionPlugin<Array<A | B | C>>>
 
-    plugin<A extends Types<Settings>, B extends Types<Settings>, C extends Types<Settings>, D extends Types<Settings>>(
+    plugin<
+      A extends Types<Settings>,
+      B extends Types<Settings>,
+      C extends Types<Settings>,
+      D extends Types<Settings>
+    >(
       A: Plugin<A, Settings>,
       B: Plugin<B, Settings>,
       C: Plugin<C, Settings>,
@@ -45,7 +54,9 @@ declare module './types' {
   }
 
   export interface Reducer<T extends Action> {
-    [SYMBOL_PLUGIN]: { plugins: Array<$.Values<Payload<T, typeof SYMBOL_PLUGIN>>> }
+    [SYMBOL_PLUGIN]: {
+      plugins: Array<$.Values<Payload<T, typeof SYMBOL_PLUGIN>>>
+    }
   }
 
   export interface Category<T extends Model<State>> {

@@ -101,7 +101,7 @@ export interface Reducer<T extends Action> {
   [SYMBOL_SEND]: { sent: Payload<T, typeof SYMBOL_SEND> }
 }
 
-export interface INITIAL_STATE {
+export interface InitialState {
   sent: false
   to: undefined
   subject: undefined
@@ -112,7 +112,7 @@ export interface Settings {
   [Options.Interface]: typeof EMAIL_INTERFACE
   [Options.Category]: typeof EMAIL_CATEGORY
   [Options.Reducer]: typeof EMAIL_REDUCER
-  [Options.InitialState]: INITIAL_STATE
+  [Options.InitialState]: InitialState
   [Options.State]: State
 }
 

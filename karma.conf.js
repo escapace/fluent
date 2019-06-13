@@ -23,7 +23,7 @@ module.exports = config => {
       'src/**/*.ts': 'karma-typescript',
       'test/**/*.ts': 'karma-typescript'
     },
-    exclude: ['src/types/**/*.d.ts'],
+    // exclude: ['**/*.d.ts'],
     reporters: ['dots', 'karma-typescript'],
     browsers: ['puppeteer'],
     customLaunchers: {
@@ -34,14 +34,25 @@ module.exports = config => {
     },
     karmaTypescriptConfig: {
       reports: {},
+      bundlerOptions: {
+        noParse: ['@escapace/typelevel'],
+        ignore: ['@escapace/typelevel']
+      },
       compilerOptions: {
-        emitDecoratorMetadata: true,
-        experimentalDecorators: true,
+        // emitDecoratorMetadata: true,
+        // experimentalDecorators: true,
         module: 'commonjs',
         sourceMap: true,
         target: 'ES5'
       },
-      tsconfig: './tsconfig.json'
+      tsconfig: './tsconfig.json',
+      include: [
+        './test/**/*.ts'
+      ],
+      exclude: [
+        'node_modules',
+        'node_modules/@escapace/typelevel'
+      ]
     }
   })
 }

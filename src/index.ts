@@ -120,10 +120,7 @@ export type Payload<
   E = never
 > = T extends Action<U, infer P> ? P : E
 
-export type Types<T extends Settings> = keyof $.Type<
-  T[Options.Category],
-  Model
->
+export type Types<T extends Settings> = keyof $.Type<T[Options.Category], Model>
 
 export interface Plugin<
   Z extends Types<T>,
@@ -142,21 +139,29 @@ export interface Plugin<
   [Options.Dependencies]?: U[]
   [Options.Enabled]?: (log: Action<U>[], state: T[Options.State]) => boolean
   [Options.Conflicts]?: U[]
-  [Options.State]?: Partial<T[Options.State]>
+  [Options.InitialState]?: Partial<T[Options.State]>
   [Options.Reducer]?: (log: Action<U>[]) => Partial<T[Options.State]>
 }
-
-// export type Builder<T extends Settings> = (value: Record<Types<T>, Plugin<T>>) => Next<T>
 
 import {
   assign,
   compact,
   defaults,
+  differenceWith,
   every,
   flatten,
+  forEach,
+  isBoolean,
+  isFunction,
+  isNumber,
+  isPlainObject,
+  isString,
+  isSymbol,
+  isUndefined,
   map,
   omit,
-  some
+  some,
+  union
 } from 'lodash'
 
 export const SYMBOL_LOG = Symbol.for('ESCAPACE_FLUENT_LOG')
@@ -168,87 +173,179 @@ export interface FluentInterface<T extends Model> {
 }
 
 export const log = <T>(fluent: { [SYMBOL_LOG]: T }): T => fluent[SYMBOL_LOG]
-export const state = <T>(fluent: { [SYMBOL_STATE]: T }): T => fluent[SYMBOL_STATE]
+export const state = <T>(fluent: { [SYMBOL_STATE]: T }): T =>
+  fluent[SYMBOL_STATE]
 
-export const builder = <T extends Settings>(
+const isType = <T extends number | string | symbol>(value: T): boolean =>
+  isString(value) || isNumber(value) || isSymbol(value)
+
+const normalize = <T extends Settings>(
   records: Plugin<Types<T>, T>[]
-): (() => Next<T>) => {
-  return () => {
-    const normalize = (r: any) =>
-      map(r, record =>
-        defaults(record, {
-          [Options.Keys]: [],
-          [Options.Dependencies]: [],
-          [Options.Enabled]: () => true,
-          [Options.Conflicts]: [],
-          [Options.State]: {},
-          [Options.Reducer]: () => ({})
-        })
-      )
+): Required<Plugin<Types<T>, T>>[] =>
+  map(records, record =>
+    defaults(record, {
+      [Options.Keys]: [],
+      [Options.Dependencies]: [],
+      [Options.Enabled]: () => true,
+      [Options.Conflicts]: [],
+      [Options.InitialState]: {},
+      [Options.Reducer]: () => ({})
+    })
+  )
 
-    const _records = normalize(records)
+interface LocalState<T extends Settings> {
+  records: Required<Plugin<Types<T>, T>>[]
+  initialState: {}
+  state: {}
+  log: Action[]
+}
 
-    const initialState = assign(
+class Lens<T extends Settings> {
+  private readonly state: LocalState<T> = {
+    records: [],
+    initialState: {},
+    state: {},
+    log: []
+  }
+
+  public dispatch(action?: Action, ...plugins: Plugin<Types<T>, T>[]) {
+    if (plugins.length !== 0) {
+      this.register(plugins)
+    }
+
+    if (!isUndefined(action)) {
+      this.state.log.unshift(action)
+    }
+
+    this.setState()
+
+    return this.interfaces()
+  }
+
+  public register(records: Plugin<Types<T>, T>[]) {
+    const newRecords: Required<Plugin<Types<T>, T>>[] = normalize(records)
+
+    this.setRecords(newRecords)
+
+    this.state.initialState = assign(
       {},
-      ...map(_records, record => record[Options.State])
+      ...map(this.state.records, record => record[Options.InitialState])
+    )
+  }
+
+  private setState() {
+    this.state.state = assign(
+      {},
+      this.state.initialState,
+      ...map(this.state.records, record =>
+        record[Options.Reducer](this.state.log)
+      )
+    )
+  }
+
+  private interfaces() {
+    const combinedInterfaces: {} = assign(
+      {
+        [SYMBOL_LOG]: this.state.log,
+        [SYMBOL_STATE]: this.state.state
+      },
+      ...map(this.state.records, record =>
+        record[Options.Interface](this.dispatch.bind(this))
+      )
     )
 
-    const log: Action[] = []
+    const keys = flatten(
+      compact(
+        map(this.state.records, record => {
+          const once = record[Options.Once]
+            ? !some(
+                this.state.log,
+                action => action.type === record[Options.Type]
+              )
+            : true
 
-    const start = () => {
-      // tslint:disable-next-line: no-use-before-declare
-      const state = assign(
-        {},
-        initialState,
-        ...map(_records, record => record[Options.Reducer](log))
+          const enabled = record[Options.Enabled](
+            this.state.log,
+            this.state.state
+          )
+
+          const conflicts = !some(record[Options.Conflicts], type =>
+            some(this.state.log, action => action.type === type)
+          )
+
+          const dependencies = every(record[Options.Dependencies], type =>
+            some(this.state.log, action => action.type === type)
+          )
+
+          return enabled && conflicts && dependencies && once
+            ? undefined
+            : record[Options.Keys]
+        })
       )
-      const interfaces = assign(
-        {
-          [SYMBOL_LOG]: log,
-          [SYMBOL_STATE]: state
-        },
-        // tslint:disable-next-line: no-use-before-declare
-        ...map(_records, record => record[Options.Interface](dispatch))
-      )
+    )
 
-      const keys = flatten(
-        compact(
-          map(_records, record => {
-            // const focus = pick(record, [Options.Enabled, Options.Conflicts, Options.Dependencies])
+    return omit(combinedInterfaces, keys)
+  }
 
-            const once = record[Options.Once]
-              ? !some(log, action => action.type === record[Options.Type])
-              : true
-            const enabled = record[Options.Enabled](log, state)
-            const conflicts = !some(record[Options.Conflicts], type =>
-              some(log, action => action.type === type)
-            )
-            const dependencies = every(record[Options.Dependencies], type =>
-              some(log, action => action.type === type)
-            )
-
-            return enabled && conflicts && dependencies && once
-              ? undefined
-              : record[Options.Keys]
-          })
-        )
-      )
-
-      return omit(interfaces, keys)
-    }
-
-    const dispatch = (action: Action, ...plugins: Plugin<Types<T>, T>[]) => {
-      if (plugins.length !== 0) {
-        _records.push(...normalize(plugins))
+  private setRecords(records: Required<Plugin<Types<T>, T>>[]) {
+    forEach(records, record => {
+      if (!isType(record[Options.Type])) {
+        throw new Error(`${record[Options.Type]} is not valid [Options.Type]`)
       }
 
-      // console.log(records)
+      if (!isBoolean(record[Options.Once])) {
+        throw new Error(`${record[Options.Type]} is not valid [Options.Once]`)
+      }
 
-      log.unshift(action)
+      if (!every(record[Options.Dependencies], isType)) {
+        throw new Error(
+          `${record[Options.Dependencies]} is not valid [Options.Dependencies]`
+        )
+      }
 
-      return start()
-    }
+      if (!every(record[Options.Conflicts], isType)) {
+        throw new Error(
+          `${record[Options.Dependencies]} is not valid [Options.Conflicts]`
+        )
+      }
 
-    return start() as Next<T>
+      if (!isFunction(record[Options.Enabled])) {
+        throw new Error(
+          `${record[Options.Enabled]} is not valid [Options.Enabled]`
+        )
+      }
+
+      if (!isFunction(record[Options.Reducer])) {
+        throw new Error(
+          `${record[Options.Reducer]} is not valid [Options.Reducer]`
+        )
+      }
+
+      if (!isPlainObject(record[Options.InitialState])) {
+        throw new Error(
+          `${record[Options.InitialState]} is not valid [Options.InitialState]`
+        )
+      }
+    })
+
+    const filteredRecords = differenceWith(
+      this.state.records,
+      records,
+      (a, b) => a[Options.Type] === b[Options.Type]
+    )
+
+    this.state.records = union(filteredRecords, records)
+  }
+}
+
+// tslint:disable-next-line: max-func-body-length
+export const builder = <T extends Settings>(
+  value: Plugin<Types<T>, T>[]
+): (() => Next<T>) => {
+  return () => {
+    const lens = new Lens<T>()
+    lens.register(value)
+
+    return lens.dispatch() as Next<T>
   }
 }
