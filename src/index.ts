@@ -23,12 +23,12 @@ export enum Options {
   Enabled,
   Dependencies,
   Conflicts,
-  Category
+  Specification
 }
 
 export interface Settings {
   [Options.Interface]: $.URIS
-  [Options.Category]: $.URIS
+  [Options.Specification]: $.URIS
   [Options.Reducer]: $.URIS
   [Options.InitialState]: {}
   [Options.State]: {}
@@ -81,7 +81,7 @@ type Fluent<T, K extends string | number | symbol> = {
 
 export type Instance<S extends Settings, T extends Model> = Fluent<
   $.Type<S[Options.Interface], T>,
-  Check<T, $.Properties<$.Type<S[Options.Category], T>>>
+  Check<T, $.Properties<$.Type<S[Options.Specification], T>>>
 >
 
 export type Reducer<T extends Settings, U extends Action> = $.Assign<
@@ -120,7 +120,10 @@ export type Payload<
   E = never
 > = T extends Action<U, infer P> ? P : E
 
-export type Types<T extends Settings> = keyof $.Type<T[Options.Category], Model>
+export type Types<T extends Settings> = keyof $.Type<
+  T[Options.Specification],
+  Model
+>
 
 export interface Plugin<
   Z extends Types<T>,

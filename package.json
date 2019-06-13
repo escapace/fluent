@@ -1,8 +1,10 @@
 {
-  "name": "typescript-library-starter",
-  "version": "0.0.0",
-  "description": "",
+  "name": "@escapace/fluent",
+  "version": "1.0.0",
+  "description": "Fluent DSL helper for TypeScript",
   "keywords": [
+    "Fluent",
+    "DSL",
     "TypeScript"
   ],
   "main": "lib/cjs/index.js",
@@ -13,10 +15,10 @@
   "files": [
     "lib"
   ],
-  "bugs": "https://github.com/escapace/typescript-library-starter/issues",
+  "bugs": "https://github.com/escapace/fluent/issues",
   "author": "escapace <opensource@escapace.com>",
   "license": "MPL-2.0",
-  "homepage": "https://github.com/escapace/typescript-library-starter",
+  "homepage": "https://github.com/escapace/fluent",
   "repository": {
     "type": "git",
     "url": ""
@@ -28,10 +30,10 @@
     "typecheck": "tsc --noEmit && cd test && tsc --noEmit",
     "lint": "tslint --exclude 'src/types/**/*.ts' --project tsconfig-node.json -t codeFrame 'src/**/*.ts' 'test/**/*.ts'",
     "build": "recce build -e src/index.ts",
-    "test:travis": "npm run typecheck && npm run lint && npm run test",
-    "test": "npm run test:node",
+    "test:travis": "npm run test",
+    "test": "npm run typecheck && npm run lint && npm run test:node",
     "report-coverage": "npm run test:coverage && nyc report --reporter=text-lcov > coverage.lcov && codecov ; rimraf coverage.lcov",
-    "test:node": "cross-env TS_NODE_PROJECT=tsconfig-node.json mocha --opts .mocha.opts 'src/**/*.spec.ts' 'test/*.ts'",
+    "test:node": "cross-env TS_NODE_PROJECT=tsconfig-node.json mocha --opts .mocha.opts 'test/*.ts'",
     "test:coverage": "nyc npm run test:node"
   },
   "lint-staged": {
@@ -69,6 +71,7 @@
     ]
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.134",
     "@commitlint/cli": "8.0.0",
     "@commitlint/config-conventional": "8.0.0",
     "@types/chai": "4.1.7",
@@ -79,7 +82,6 @@
     "cross-env": "5.2.0",
     "husky": "2.4.0",
     "lint-staged": "8.2.0",
-    "lodash": "^4.17.11",
     "mocha": "6.1.4",
     "nyc": "14.1.1",
     "rimraf": "2.6.3",
@@ -94,7 +96,7 @@
   },
   "dependencies": {
     "@escapace/typelevel": "^0.2.1",
-    "@types/lodash": "^4.14.134",
+    "lodash": "^4.17.11",
     "tslib": "^1.9.3"
   }
 }
