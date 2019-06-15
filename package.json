@@ -71,7 +71,7 @@
     ]
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.134",
+    "@types/lodash": "4.14.134",
     "@commitlint/cli": "8.0.0",
     "@commitlint/config-conventional": "8.0.0",
     "@types/chai": "4.1.7",
