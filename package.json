@@ -76,7 +76,7 @@
   "scripts": {
     "build": "recce build -e src/index.ts",
     "lint": "tslint --project tsconfig-test.json -t codeFrame",
-    "test": "recce test -p tsconfig-test.json --browser 'test/**.spec.ts' --node 'test/**.spec.ts' --reporter lcov --reporter text",
+    "test": "recce test -p tsconfig-test.json --browser 'test/**.spec.ts' --node 'test/**.spec.ts' --reporter lcov --reporter text --coverage-exclude 'test/**/*.ts'",
     "typecheck": "tsc -p tsconfig-test.json --noEmit"
   },
   "sideEffects": false,
