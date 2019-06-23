@@ -311,11 +311,8 @@ class Lens<T extends Settings> {
   }
 
   private interfaces() {
-    const combinedInterfaces: {} = assign(
-      {
-        [SYMBOL_LOG]: this.state.log,
-        [SYMBOL_STATE]: this.state.state
-      },
+    const combinedInterfaces: {} = Object.assign(
+      {},
       ...map(this.state.records, record =>
         record[Options.Interface](this.dispatch.bind(this))
       )
@@ -351,7 +348,10 @@ class Lens<T extends Settings> {
       )
     )
 
-    return omit(combinedInterfaces, keys)
+    return Object.assign(omit(combinedInterfaces, keys), {
+      [SYMBOL_LOG]: this.state.log,
+      [SYMBOL_STATE]: this.state.state
+    })
   }
 
   private setRecords(records: Required<Plugin<Types<T>, T>>[]) {
@@ -376,6 +376,6 @@ export const builder = <T extends Settings>(
 
     lens.register(normalized)
 
-    return lens.dispatch() as Next<T>
+    return (lens.dispatch() as unknown) as Next<T>
   }
 }

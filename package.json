@@ -1,92 +1,29 @@
 {
   "name": "@escapace/fluent",
-  "version": "1.0.0",
   "description": "Fluent DSL helper for TypeScript",
-  "keywords": [
-    "Fluent",
-    "DSL",
-    "TypeScript"
-  ],
-  "main": "lib/cjs/index.js",
-  "module": "lib/esm/index.js",
-  "browser": "lib/umd/index.js",
-  "typings": "lib/types/index.d.ts",
-  "sideEffects": false,
-  "files": [
-    "lib"
-  ],
-  "bugs": "https://github.com/escapace/fluent/issues",
+  "version": "0.0.0",
   "author": "escapace <opensource@escapace.com>",
-  "license": "MPL-2.0",
-  "homepage": "https://github.com/escapace/fluent",
-  "repository": {
-    "type": "git",
-    "url": ""
-  },
-  "engines": {
-    "node": ">=9.0.0"
-  },
-  "scripts": {
-    "typecheck": "tsc --noEmit && cd test && tsc --noEmit",
-    "lint": "tslint --exclude 'src/types/**/*.ts' --project tsconfig-node.json -t codeFrame 'src/**/*.ts' 'test/**/*.ts'",
-    "build": "recce build -e src/index.ts",
-    "test:travis": "npm run test",
-    "test": "npm run typecheck && npm run lint && npm run test:node",
-    "report-coverage": "npm run test:coverage && nyc report --reporter=text-lcov > coverage.lcov && codecov ; rimraf coverage.lcov",
-    "test:node": "cross-env TS_NODE_PROJECT=tsconfig-node.json mocha --opts .mocha.opts 'test/*.ts'",
-    "test:coverage": "nyc npm run test:node"
-  },
-  "lint-staged": {
-    "{src,test}/**/*.ts": [
-      "tslint --exclude 'src/types/**/*.ts' --project tsconfig-node.json --fix",
-      "prettier --write",
-      "git add"
-    ],
-    "{src,test}/**/*.js": [
-      "prettier --write",
-      "git add"
-    ]
-  },
-  "husky": {
-    "hooks": {
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
-      "pre-commit": "lint-staged"
-    }
-  },
-  "nyc": {
-    "tempDirectory": "./node_modules/.cache/nyc_output",
-    "include": [
-      "src/**/*.ts"
-    ],
-    "extension": [
-      ".ts",
-      ".tsx"
-    ],
-    "exclude": [
-      "src/**/*.spec.ts",
-      "test/**/*.ts"
-    ],
-    "reporter": [
-      "text"
-    ]
+  "browser": "lib/umd/index.js",
+  "bugs": "https://github.com/escapace/fluent/issues",
+  "dependencies": {
+    "@escapace/typelevel": "0.2.1",
+    "lodash": "4.17.11",
+    "tslib": "1.9.3"
   },
   "devDependencies": {
-    "@types/lodash": "4.14.134",
     "@commitlint/cli": "8.0.0",
     "@commitlint/config-conventional": "8.0.0",
     "@types/chai": "4.1.7",
+    "@types/lodash": "4.14.134",
     "@types/mocha": "5.2.7",
     "@types/node": "12.0.8",
     "chai": "4.2.0",
     "codecov": "3.5.0",
-    "cross-env": "5.2.0",
     "husky": "2.4.1",
     "lint-staged": "8.2.1",
-    "mocha": "6.1.4",
-    "nyc": "14.1.1",
-    "rimraf": "2.6.3",
-    "source-map-support": "0.5.12",
-    "ts-node": "8.3.0",
+    "prettier": "1.18.2",
+    "semantic-release": "15.13.16",
+    "syncpack": "4.5.2",
     "tslint": "5.17.0",
     "tslint-config-escapace": "1.5.0",
     "tslint-config-prettier": "1.18.0",
@@ -94,9 +31,54 @@
     "tslint-microsoft-contrib": "6.2.0",
     "typescript": "3.5.2"
   },
-  "dependencies": {
-    "@escapace/typelevel": "^0.2.1",
-    "lodash": "^4.17.11",
-    "tslib": "^1.9.3"
-  }
+  "engines": {
+    "node": ">=10.16.0"
+  },
+  "files": [
+    "lib"
+  ],
+  "homepage": "https://github.com/escapace/fluent",
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
+      "pre-commit": "lint-staged && npm run typecheck && npm run test"
+    }
+  },
+  "keywords": [
+    "DSL",
+    "Fluent",
+    "TypeScript"
+  ],
+  "license": "MPL-2.0",
+  "lint-staged": {
+    "package.json": [
+      "syncpack-format --source",
+      "syncpack-set-semver-ranges --dev --source",
+      "git add"
+    ],
+    "{src,examples,perf}/**/*.ts": [
+      "tslint --project tsconfig-test.json --fix",
+      "prettier --write",
+      "git add"
+    ],
+    "{src,examples,perf}/**/*.js": [
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "main": "lib/cjs/index.js",
+  "module": "lib/esm/index.js",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": "escapace/fluent",
+  "scripts": {
+    "build": "recce build -e src/index.ts",
+    "lint": "tslint --project tsconfig-test.json -t codeFrame",
+    "test": "recce test -p tsconfig-test.json --browser 'test/**.spec.ts' --node 'test/**.spec.ts' --reporter lcov --reporter text",
+    "typecheck": "tsc -p tsconfig-test.json --noEmit"
+  },
+  "sideEffects": false,
+  "typings": "lib/types/index.d.ts"
 }
