@@ -211,6 +211,7 @@ class Lens<T extends Settings> {
     log: []
   }
 
+  // tslint:disable-next-line: function-name
   public static normalizeRecords<T extends Settings>(
     value: Plugin<Types<T>, T>[]
   ): Required<Plugin<Types<T>, T>>[] {
