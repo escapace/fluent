@@ -75,7 +75,7 @@ export type Check<T extends Model, S> = S extends Specification
     : never
   : never
 
-type Fluent<T, K extends string | number | symbol> = {
+export type Fluent<T, K extends string | number | symbol> = {
   [P in Exclude<keyof T, K>]: T[P]
 }
 
