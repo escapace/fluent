@@ -65,7 +65,7 @@ export type Check<T extends Model, S> = S extends Specification
           | $.If<
               $.Or<$.Is.Never<S[Options.Conflicts]>, $.Is.Unknown<X>>,
               $.True,
-              $.Not<$.Contains<X, S[Options.Conflicts]>>
+              $.Not<$.Has<X, S[Options.Conflicts]>>
             >,
           $.True
         >,
