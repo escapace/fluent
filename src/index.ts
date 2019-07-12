@@ -136,7 +136,8 @@ export interface Plugin<
     dispatch: <A extends Action<U>, B extends Types<T> = Types<T>>(
       action: A,
       ...plugins: Plugin<B, T>[]
-    ) => void
+    ) => void,
+    state: T[Options.State]
   ) => {}
   [Options.Keys]?: Array<string | number | symbol>
   [Options.Dependencies]?: U[]
@@ -315,7 +316,7 @@ class Lens<T extends Settings> {
     const combinedInterfaces: {} = Object.assign(
       {},
       ...map(this.state.records, record =>
-        record[Options.Interface](this.dispatch.bind(this))
+        record[Options.Interface](this.dispatch.bind(this), this.state.state)
       )
     )
 
