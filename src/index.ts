@@ -148,24 +148,13 @@ export interface Plugin<
 }
 
 import {
-  assign,
-  compact,
-  defaults,
-  differenceWith,
-  every,
-  flatten,
-  forEach,
   isBoolean,
   isFunction,
   isNumber,
   isPlainObject,
   isString,
   isSymbol,
-  isUndefined,
-  map,
-  omit,
-  some,
-  union
+  isUndefined
 } from 'lodash'
 
 export const SYMBOL_LOG = Symbol.for('ESCAPACE_FLUENT_LOG')
@@ -183,22 +172,44 @@ export const state = <T>(fluent: { [SYMBOL_STATE]: T }): T =>
 const isType = <T extends number | string | symbol>(value: T): boolean =>
   isString(value) || isNumber(value) || isSymbol(value)
 
+const every = <T>(
+  collection: Array<T>,
+  predicate: (value: T) => boolean
+): boolean => collection.filter(predicate).length === collection.length
+
+const some = <T>(
+  collection: Array<T>,
+  predicate: (value: T) => boolean
+): boolean => {
+  let current: number = 0
+
+  while (current < collection.length) {
+    if (predicate(collection[current])) {
+      return true
+    }
+
+    // tslint:disable-next-line: increment-decrement
+    ++current
+  }
+
+  return false
+}
+
 const normalize = <T extends Settings>(
   records: Plugin<Types<T>, T>[]
 ): Required<Plugin<Types<T>, T>>[] =>
-  map(records, record =>
-    defaults(record, {
-      [Options.Keys]: [],
-      [Options.Dependencies]: [],
-      [Options.Enabled]: () => true,
-      [Options.Conflicts]: [],
-      [Options.InitialState]: {},
-      [Options.Reducer]: () => ({})
-    })
-  )
+  records.map(record => ({
+    [Options.Keys]: [],
+    [Options.Dependencies]: [],
+    [Options.Enabled]: () => true,
+    [Options.Conflicts]: [],
+    [Options.InitialState]: {},
+    [Options.Reducer]: () => ({}),
+    ...record
+  }))
 
 interface LocalState<T extends Settings> {
-  records: Required<Plugin<Types<T>, T>>[]
+  records: Map<number | string | symbol, Required<Plugin<Types<T>, T>>>
   initialState: {}
   state: {}
   log: Action[]
@@ -206,7 +217,7 @@ interface LocalState<T extends Settings> {
 
 class Lens<T extends Settings> {
   private readonly state: LocalState<T> = {
-    records: [],
+    records: new Map(),
     initialState: {},
     state: {},
     log: []
@@ -218,7 +229,7 @@ class Lens<T extends Settings> {
   ): Required<Plugin<Types<T>, T>>[] {
     const records: Required<Plugin<Types<T>, T>>[] = normalize(value)
 
-    forEach(records, record => {
+    records.forEach(record => {
       if (!isType(record[Options.Type])) {
         throw new Error('Not valid [Options.Type]')
       }
@@ -296,74 +307,69 @@ class Lens<T extends Settings> {
   public register(records: Required<Plugin<Types<T>, T>>[]) {
     this.setRecords(records)
 
-    this.state.initialState = assign(
+    this.state.initialState = Object.assign(
       {},
-      ...map(this.state.records, record => record[Options.InitialState])
+      ...Array.from(this.state.records.values()).map(
+        record => record[Options.InitialState]
+      )
     )
   }
 
   private setState() {
-    this.state.state = assign(
+    this.state.state = Object.assign(
       {},
       this.state.initialState,
-      ...map(this.state.records, record =>
+      ...Array.from(this.state.records.values()).map(record =>
         record[Options.Reducer](this.state.log)
       )
     )
   }
 
-  private interfaces() {
-    const combinedInterfaces: {} = Object.assign(
-      {},
-      ...map(this.state.records, record =>
+  private interfaces(): {} {
+    const keys: (string | number | symbol)[] = []
+
+    this.state.records.forEach(record => {
+      const once = record[Options.Once]
+        ? !some(this.state.log, action => action.type === record[Options.Type])
+        : true
+
+      const enabled = record[Options.Enabled](this.state.log, this.state.state)
+
+      const conflicts = !some(record[Options.Conflicts], type =>
+        some(this.state.log, action => action.type === type)
+      )
+
+      const dependencies = every(record[Options.Dependencies], type =>
+        some(this.state.log, action => action.type === type)
+      )
+
+      if (!(enabled && conflicts && dependencies && once)) {
+        record[Options.Keys].forEach(key => keys.push(key))
+      }
+    })
+
+    const combinedInterfaces = Object.assign(
+      {
+        [SYMBOL_LOG]: this.state.log,
+        [SYMBOL_STATE]: this.state.state
+      },
+      ...Array.from(this.state.records.values()).map(record =>
         record[Options.Interface](this.dispatch.bind(this), this.state.state)
       )
     )
 
-    const keys = flatten(
-      compact(
-        map(this.state.records, record => {
-          const once = record[Options.Once]
-            ? !some(
-                this.state.log,
-                action => action.type === record[Options.Type]
-              )
-            : true
-
-          const enabled = record[Options.Enabled](
-            this.state.log,
-            this.state.state
-          )
-
-          const conflicts = !some(record[Options.Conflicts], type =>
-            some(this.state.log, action => action.type === type)
-          )
-
-          const dependencies = every(record[Options.Dependencies], type =>
-            some(this.state.log, action => action.type === type)
-          )
-
-          return enabled && conflicts && dependencies && once
-            ? undefined
-            : record[Options.Keys]
-        })
-      )
-    )
-
-    return Object.assign(omit(combinedInterfaces, keys), {
-      [SYMBOL_LOG]: this.state.log,
-      [SYMBOL_STATE]: this.state.state
+    keys.forEach(key => {
+      // tslint:disable-next-line: no-dynamic-delete
+      delete combinedInterfaces[key]
     })
+
+    return combinedInterfaces
   }
 
   private setRecords(records: Required<Plugin<Types<T>, T>>[]) {
-    const filteredRecords = differenceWith(
-      this.state.records,
-      records,
-      (a, b) => a[Options.Type] === b[Options.Type]
-    )
-
-    this.state.records = union(filteredRecords, records)
+    records.forEach(record => {
+      this.state.records.set(record[Options.Type], record)
+    })
   }
 }
 
