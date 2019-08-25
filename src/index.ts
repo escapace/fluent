@@ -209,7 +209,7 @@ const normalize = <T extends Settings>(
   }))
 
 interface LocalState<T extends Settings> {
-  records: Map<number | string | symbol, Required<Plugin<Types<T>, T>>>
+  records: Array<Required<Plugin<Types<T>, T>>>
   initialState: {}
   state: {}
   log: Action[]
@@ -217,7 +217,7 @@ interface LocalState<T extends Settings> {
 
 class Lens<T extends Settings> {
   private readonly state: LocalState<T> = {
-    records: new Map(),
+    records: [],
     initialState: {},
     state: {},
     log: []
@@ -309,9 +309,7 @@ class Lens<T extends Settings> {
 
     this.state.initialState = Object.assign(
       {},
-      ...Array.from(this.state.records.values()).map(
-        record => record[Options.InitialState]
-      )
+      ...this.state.records.map(record => record[Options.InitialState])
     )
   }
 
@@ -319,16 +317,14 @@ class Lens<T extends Settings> {
     this.state.state = Object.assign(
       {},
       this.state.initialState,
-      ...Array.from(this.state.records.values()).map(record =>
+      ...this.state.records.map(record =>
         record[Options.Reducer](this.state.log)
       )
     )
   }
 
-  private interfaces(): {} {
-    const keys: (string | number | symbol)[] = []
-
-    this.state.records.forEach(record => {
+  private disabled(): Array<Required<Plugin<Types<T>, T>>> {
+    return this.state.records.filter(record => {
       const once = record[Options.Once]
         ? !some(this.state.log, action => action.type === record[Options.Type])
         : true
@@ -343,17 +339,27 @@ class Lens<T extends Settings> {
         some(this.state.log, action => action.type === type)
       )
 
-      if (!(enabled && conflicts && dependencies && once)) {
-        record[Options.Keys].forEach(key => keys.push(key))
-      }
+      return !(enabled && conflicts && dependencies && once)
     })
+  }
+
+  // private enabled(): Array<Required<Plugin<Types<T>, T>>> {
+  //   return this.state.records.filter(record =>
+  //     this.disabled().indexOf(record) === -1
+  //   )
+  // }
+
+  private interfaces(): {} {
+    const keys: (string | number | symbol)[] = this.disabled().flatMap(
+      record => record[Options.Keys]
+    )
 
     const combinedInterfaces = Object.assign(
       {
         [SYMBOL_LOG]: this.state.log,
         [SYMBOL_STATE]: this.state.state
       },
-      ...Array.from(this.state.records.values()).map(record =>
+      ...this.state.records.map(record =>
         record[Options.Interface](this.dispatch.bind(this), this.state.state)
       )
     )
@@ -368,7 +374,7 @@ class Lens<T extends Settings> {
 
   private setRecords(records: Required<Plugin<Types<T>, T>>[]) {
     records.forEach(record => {
-      this.state.records.set(record[Options.Type], record)
+      this.state.records.push(record)
     })
   }
 }
