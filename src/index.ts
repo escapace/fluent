@@ -350,8 +350,11 @@ class Lens<T extends Settings> {
   // }
 
   private interfaces(): {} {
-    const keys: (string | number | symbol)[] = this.disabled().flatMap(
-      record => record[Options.Keys]
+    const keys: (string | number | symbol)[] = this.disabled().reduce(
+      (prev: (string | number | symbol)[], record) => {
+        return prev.concat(record[Options.Keys])
+      },
+      []
     )
 
     const combinedInterfaces = Object.assign(
