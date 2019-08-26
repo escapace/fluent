@@ -210,85 +210,89 @@ const normalize = <T extends Settings>(
 
 interface LocalState<T extends Settings> {
   records: Array<Required<Plugin<Types<T>, T>>>
+  reducers: Array<Required<Plugin<Types<T>, T>>[Options.Reducer]>
   initialState: {}
   state: {}
   log: Action[]
 }
 
+const normalizeRecords = <T extends Settings>(
+  value: Plugin<Types<T>, T>[]
+): Required<Plugin<Types<T>, T>>[] => {
+  const records: Required<Plugin<Types<T>, T>>[] = normalize(value)
+
+  records.forEach(record => {
+    if (!isType(record[Options.Type])) {
+      throw new Error('Not valid [Options.Type]')
+    }
+
+    if (!isBoolean(record[Options.Once])) {
+      throw new Error(
+        `Not valid [Options.Once] in the ${String(
+          record[Options.Type]
+        )} specification`
+      )
+    }
+
+    if (!every(record[Options.Dependencies], isType)) {
+      throw new Error(
+        `Not valid [Options.Dependencies] in the ${String(
+          record[Options.Type]
+        )} specification`
+      )
+    }
+
+    if (!every(record[Options.Conflicts], isType)) {
+      throw new Error(
+        `Not valid [Options.Conflicts] in the ${String(
+          record[Options.Type]
+        )} specification`
+      )
+    }
+
+    if (!isFunction(record[Options.Enabled])) {
+      throw new Error(
+        `Not valid [Options.Enabled] in the ${String(
+          record[Options.Type]
+        )} specification`
+      )
+    }
+
+    if (!isFunction(record[Options.Reducer])) {
+      throw new Error(
+        `Not valid [Options.Reducer] in the ${String(
+          record[Options.Type]
+        )} specification`
+      )
+    }
+
+    if (!isPlainObject(record[Options.InitialState])) {
+      throw new Error(
+        `Not valid [Options.InitialState] in the ${String(
+          record[Options.Type]
+        )} specification`
+      )
+    }
+  })
+
+  return records
+}
+
 class Lens<T extends Settings> {
   private readonly state: LocalState<T> = {
     records: [],
+    reducers: [],
     initialState: {},
     state: {},
     log: []
   }
 
-  // tslint:disable-next-line: function-name
-  public static normalizeRecords<T extends Settings>(
-    value: Plugin<Types<T>, T>[]
-  ): Required<Plugin<Types<T>, T>>[] {
-    const records: Required<Plugin<Types<T>, T>>[] = normalize(value)
-
-    records.forEach(record => {
-      if (!isType(record[Options.Type])) {
-        throw new Error('Not valid [Options.Type]')
-      }
-
-      if (!isBoolean(record[Options.Once])) {
-        throw new Error(
-          `Not valid [Options.Once] in the ${String(
-            record[Options.Type]
-          )} specification`
-        )
-      }
-
-      if (!every(record[Options.Dependencies], isType)) {
-        throw new Error(
-          `Not valid [Options.Dependencies] in the ${String(
-            record[Options.Type]
-          )} specification`
-        )
-      }
-
-      if (!every(record[Options.Conflicts], isType)) {
-        throw new Error(
-          `Not valid [Options.Conflicts] in the ${String(
-            record[Options.Type]
-          )} specification`
-        )
-      }
-
-      if (!isFunction(record[Options.Enabled])) {
-        throw new Error(
-          `Not valid [Options.Enabled] in the ${String(
-            record[Options.Type]
-          )} specification`
-        )
-      }
-
-      if (!isFunction(record[Options.Reducer])) {
-        throw new Error(
-          `Not valid [Options.Reducer] in the ${String(
-            record[Options.Type]
-          )} specification`
-        )
-      }
-
-      if (!isPlainObject(record[Options.InitialState])) {
-        throw new Error(
-          `Not valid [Options.InitialState] in the ${String(
-            record[Options.Type]
-          )} specification`
-        )
-      }
-    })
-
-    return records
-  }
-
-  public dispatch(action?: Action, ...plugins: Plugin<Types<T>, T>[]) {
+  public readonly dispatch = (
+    action?: Action,
+    ...plugins: Plugin<Types<T>, T>[]
+  ) => {
     if (plugins.length !== 0) {
-      this.register(Lens.normalizeRecords(plugins))
+      this.register(normalizeRecords(plugins))
     }
 
     if (!isUndefined(action)) {
@@ -304,7 +308,7 @@ class Lens<T extends Settings> {
     return this.interfaces()
   }
 
-  public register(records: Required<Plugin<Types<T>, T>>[]) {
+  public readonly register = (records: Required<Plugin<Types<T>, T>>[]) => {
     this.setRecords(records)
 
     this.state.initialState = Object.assign(
@@ -313,34 +317,40 @@ class Lens<T extends Settings> {
     )
   }
 
+  private readonly tests = (
+    record: Required<Plugin<Types<T>, T>>
+  ): Array<() => boolean> => [
+    () =>
+      every(record[Options.Dependencies], type =>
+        some(this.state.log, action => action.type === type)
+      ),
+    () => record[Options.Enabled](this.state.log, this.state.state),
+    () =>
+      record[Options.Once]
+        ? !some(this.state.log, action => action.type === record[Options.Type])
+        : true,
+    () =>
+      !some(record[Options.Conflicts], type =>
+        some(this.state.log, action => action.type === type)
+      )
+  ]
+
   private setState() {
     this.state.state = Object.assign(
       {},
       this.state.initialState,
-      ...this.state.records.map(record =>
-        record[Options.Reducer](this.state.log)
-      )
+      ...this.state.reducers.map(reducer => reducer(this.state.log))
     )
   }
 
   private disabled(): Array<Required<Plugin<Types<T>, T>>> {
-    return this.state.records.filter(record => {
-      const once = record[Options.Once]
-        ? !some(this.state.log, action => action.type === record[Options.Type])
-        : true
-
-      const enabled = record[Options.Enabled](this.state.log, this.state.state)
-
-      const conflicts = !some(record[Options.Conflicts], type =>
-        some(this.state.log, action => action.type === type)
-      )
-
-      const dependencies = every(record[Options.Dependencies], type =>
-        some(this.state.log, action => action.type === type)
-      )
-
-      return !(enabled && conflicts && dependencies && once)
-    })
+    return this.state.records.filter(
+      record =>
+        !this.tests(record).reduce(
+          (prev, curr) => (prev ? curr() : false),
+          true as boolean
+        )
+    )
   }
 
   // private enabled(): Array<Required<Plugin<Types<T>, T>>> {
@@ -363,7 +373,7 @@ class Lens<T extends Settings> {
         [SYMBOL_STATE]: this.state.state
       },
       ...this.state.records.map(record =>
-        record[Options.Interface](this.dispatch.bind(this), this.state.state)
+        record[Options.Interface](this.dispatch, this.state.state)
       )
     )
 
@@ -378,6 +388,10 @@ class Lens<T extends Settings> {
   private setRecords(records: Required<Plugin<Types<T>, T>>[]) {
     records.forEach(record => {
       this.state.records.push(record)
+
+      if (this.state.reducers.indexOf(record[Options.Reducer]) === -1) {
+        this.state.reducers.push(record[Options.Reducer])
+      }
     })
   }
 }
@@ -386,7 +400,7 @@ class Lens<T extends Settings> {
 export const builder = <T extends Settings>(
   value: Plugin<Types<T>, T>[]
 ): (() => Next<T>) => {
-  const normalized = Lens.normalizeRecords(value)
+  const normalized = normalizeRecords(value)
 
   return () => {
     const lens = new Lens<T>()
