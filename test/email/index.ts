@@ -58,7 +58,7 @@ export const email = builder<Settings>([
     [Options.Type]: SYMBOL_BODY,
     [Options.Once]: true,
     [Options.Keys]: ['body'],
-    [Options.Dependencies]: [SYMBOL_TO, SYMBOL_SUBJECT],
+    [Options.Dependencies]: () => [SYMBOL_TO, SYMBOL_SUBJECT],
     [Options.Reducer]: log => ({
       body: get(find(log, action => action.type === SYMBOL_BODY), 'payload')
     }),

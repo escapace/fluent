@@ -140,7 +140,9 @@ export interface Plugin<
     state: T[Options.State]
   ) => {}
   [Options.Keys]?: Array<string | number | symbol>
-  [Options.Dependencies]?: U[]
+  [Options.Dependencies]?:
+    | U[]
+    | ((log: Action<U>[], state: T[Options.State]) => U[])
   [Options.Enabled]?: (log: Action<U>[], state: T[Options.State]) => boolean
   [Options.Conflicts]?: U[]
   [Options.InitialState]?: Partial<T[Options.State]>
@@ -148,6 +150,7 @@ export interface Plugin<
 }
 
 import {
+  isArray,
   isBoolean,
   isFunction,
   isNumber,
@@ -234,7 +237,16 @@ const normalizeRecords = <T extends Settings>(
       )
     }
 
-    if (!every(record[Options.Dependencies], isType)) {
+    if (
+      !(
+        isFunction(record[Options.Dependencies]) ||
+        (isArray(record[Options.Dependencies]) &&
+          every(
+            record[Options.Dependencies] as Array<number | string | symbol>,
+            isType
+          ))
+      )
+    ) {
       throw new Error(
         `Not valid [Options.Dependencies] in the ${String(
           record[Options.Type]
@@ -321,8 +333,14 @@ class Lens<T extends Settings> {
     record: Required<Plugin<Types<T>, T>>
   ): Array<() => boolean> => [
     () =>
-      every(record[Options.Dependencies], type =>
-        some(this.state.log, action => action.type === type)
+      every(
+        isFunction(record[Options.Dependencies])
+          ? (record[Options.Dependencies] as Function)(
+              this.state.log,
+              this.state.state
+            )
+          : record[Options.Dependencies],
+        type => some(this.state.log, action => action.type === type)
       ),
     () => record[Options.Enabled](this.state.log, this.state.state),
     () =>
