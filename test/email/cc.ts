@@ -15,11 +15,11 @@ export interface ActionCC<T extends string> {
 
 declare module './types' {
   export interface State {
-    cc: string[] | undefined
+    cc?: string[]
   }
 
   export interface InitialState {
-    cc: [] | undefined
+    cc?: []
   }
 
   export interface Email<T extends Model<State>> {

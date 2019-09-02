@@ -32,6 +32,8 @@ describe('email', () => {
     const _log: never[] = log(test)
     const _state: InitialState = state(test)
 
+    // const qwe = _state.cc
+
     assert.isObject(test)
     assert.hasAllKeys(test, ['to', 'plugin', SYMBOL_LOG, SYMBOL_STATE])
     assert.isFunction(test.to)
@@ -245,7 +247,7 @@ describe('email', () => {
         subject: 'Hello World'
         body: 'Totam est perferendis provident consequatur et harum autem.'
         plugins: Array<typeof SYMBOL_CC | typeof SYMBOL_ATTACHMENT>
-        cc: [] | undefined
+        cc?: []
       }
     > = state(test)
 
@@ -303,7 +305,7 @@ describe('email', () => {
         subject: 'Hello World'
         body: 'Totam est perferendis provident consequatur et harum autem.'
         plugins: Array<typeof SYMBOL_CC | typeof SYMBOL_ATTACHMENT>
-        cc: Array<'jane.doe@example.com' | 'justin.doe@example.com'> | undefined
+        cc?: Array<'jane.doe@example.com' | 'justin.doe@example.com'>
       }
     > = state(test)
 
@@ -370,7 +372,7 @@ describe('email', () => {
         subject: 'Hello World'
         body: 'Totam est perferendis provident consequatur et harum autem.'
         plugins: Array<typeof SYMBOL_CC | typeof SYMBOL_ATTACHMENT>
-        cc: [] | undefined
+        cc?: []
       }
     > = state(test)
 
