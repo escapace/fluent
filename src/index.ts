@@ -137,6 +137,7 @@ export interface Plugin<
       action: A,
       ...plugins: Plugin<B, T>[]
     ) => void,
+    log: Action<U>[],
     state: T[Options.State]
   ) => {}
   [Options.Keys]?: Array<string | number | symbol>
@@ -391,7 +392,11 @@ class Lens<T extends Settings> {
         [SYMBOL_STATE]: this.state.state
       },
       ...this.state.records.map(record =>
-        record[Options.Interface](this.dispatch, this.state.state)
+        record[Options.Interface](
+          this.dispatch,
+          this.state.log,
+          this.state.state
+        )
       )
     )
 
