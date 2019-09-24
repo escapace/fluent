@@ -372,14 +372,13 @@ class Lens<T extends Settings> {
     )
   }
 
-  // private enabled(): Array<Required<Plugin<Types<T>, T>>> {
-  //   return this.state.records.filter(record =>
-  //     this.disabled().indexOf(record) === -1
-  //   )
-  // }
-
   private interfaces(): {} {
-    const keys: (string | number | symbol)[] = this.disabled().reduce(
+    const disabled = this.disabled()
+    const enabled = this.state.records.filter(
+      record => disabled.indexOf(record) === -1
+    )
+
+    const keys: (string | number | symbol)[] = disabled.reduce(
       (prev: (string | number | symbol)[], record) => {
         return prev.concat(record[Options.Keys])
       },
@@ -391,7 +390,7 @@ class Lens<T extends Settings> {
         [SYMBOL_LOG]: this.state.log,
         [SYMBOL_STATE]: this.state.state
       },
-      ...this.state.records.map(record =>
+      ...enabled.map(record =>
         record[Options.Interface](
           this.dispatch,
           this.state.log,
@@ -400,10 +399,12 @@ class Lens<T extends Settings> {
       )
     )
 
-    keys.forEach(key => {
-      // tslint:disable-next-line: no-dynamic-delete
-      delete combinedInterfaces[key]
-    })
+    Object.keys(combinedInterfaces)
+      .filter(key => keys.includes(key))
+      .forEach(key => {
+        // tslint:disable-next-line: no-dynamic-delete
+        delete combinedInterfaces[key]
+      })
 
     return combinedInterfaces
   }
