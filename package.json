@@ -13,7 +13,7 @@
   "devDependencies": {
     "@commitlint/cli": "8.2.0",
     "@commitlint/config-conventional": "8.2.0",
-    "@types/chai": "4.2.5",
+    "@types/chai": "4.2.6",
     "@types/lodash": "4.14.149",
     "@types/mocha": "5.2.7",
     "@types/node": "12.12.14",
@@ -29,7 +29,7 @@
     "tslint-config-prettier": "1.18.0",
     "tslint-config-standard": "9.0.0",
     "tslint-microsoft-contrib": "6.2.0",
-    "typescript": "3.7.2"
+    "typescript": "3.7.3"
   },
   "engines": {
     "node": ">=10.16.0"
