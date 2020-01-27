@@ -1,6 +1,15 @@
-/* tslint:disable completed-docs no-any no-unsafe-any */
-
 import $ from '@escapace/typelevel'
+
+import {
+  isArray,
+  isBoolean,
+  isFunction,
+  isNumber,
+  isPlainObject,
+  isString,
+  isSymbol,
+  isUndefined
+} from 'lodash'
 
 export interface Action<T extends string | number | symbol = any, U = any> {
   type: T
@@ -135,37 +144,29 @@ export interface Plugin<
   [Options.Interface]: (
     dispatch: <A extends Action<U>, B extends Types<T> = Types<T>>(
       action: A,
-      ...plugins: Plugin<B, T>[]
+      ...plugins: Array<Plugin<B, T>>
     ) => void,
-    log: Action<U>[],
+    log: Array<Action<U>>,
     state: T[Options.State]
   ) => {}
   [Options.Keys]?: Array<string | number | symbol>
   [Options.Dependencies]?:
     | U[]
-    | ((log: Action<U>[], state: T[Options.State]) => U[])
-  [Options.Enabled]?: (log: Action<U>[], state: T[Options.State]) => boolean
+    | ((log: Array<Action<U>>, state: T[Options.State]) => U[])
+  [Options.Enabled]?: (
+    log: Array<Action<U>>,
+    state: T[Options.State]
+  ) => boolean
   [Options.Conflicts]?: U[]
   [Options.InitialState]?: Partial<T[Options.State]>
-  [Options.Reducer]?: (log: Action<U>[]) => Partial<T[Options.State]>
+  [Options.Reducer]?: (log: Array<Action<U>>) => Partial<T[Options.State]>
 }
-
-import {
-  isArray,
-  isBoolean,
-  isFunction,
-  isNumber,
-  isPlainObject,
-  isString,
-  isSymbol,
-  isUndefined
-} from 'lodash'
 
 export const SYMBOL_LOG = Symbol.for('ESCAPACE_FLUENT_LOG')
 export const SYMBOL_STATE = Symbol.for('ESCAPACE_FLUENT_STATE')
 
 export interface FluentInterface<T extends Model> {
-  readonly [SYMBOL_LOG]: T extends Model<any, infer U> ? Array<U> : []
+  readonly [SYMBOL_LOG]: T extends Model<any, infer U> ? U[] : []
   readonly [SYMBOL_STATE]: T extends Model<infer U> ? U : {}
 }
 
@@ -176,23 +177,20 @@ export const state = <T>(fluent: { [SYMBOL_STATE]: T }): T =>
 const isType = <T extends number | string | symbol>(value: T): boolean =>
   isString(value) || isNumber(value) || isSymbol(value)
 
-const every = <T>(
-  collection: Array<T>,
-  predicate: (value: T) => boolean
-): boolean => collection.filter(predicate).length === collection.length
+const every = <T>(collection: T[], predicate: (value: T) => boolean): boolean =>
+  collection.filter(predicate).length === collection.length
 
 const some = <T>(
-  collection: Array<T>,
+  collection: T[],
   predicate: (value: T) => boolean
 ): boolean => {
-  let current: number = 0
+  let current = 0
 
   while (current < collection.length) {
     if (predicate(collection[current])) {
       return true
     }
 
-    // tslint:disable-next-line: increment-decrement
     ++current
   }
 
@@ -200,8 +198,8 @@ const some = <T>(
 }
 
 const normalize = <T extends Settings>(
-  records: Plugin<Types<T>, T>[]
-): Required<Plugin<Types<T>, T>>[] =>
+  records: Array<Plugin<Types<T>, T>>
+): Array<Required<Plugin<Types<T>, T>>> =>
   records.map(record => ({
     [Options.Keys]: [],
     [Options.Dependencies]: [],
@@ -221,9 +219,9 @@ interface LocalState<T extends Settings> {
 }
 
 const normalizeRecords = <T extends Settings>(
-  value: Plugin<Types<T>, T>[]
-): Required<Plugin<Types<T>, T>>[] => {
-  const records: Required<Plugin<Types<T>, T>>[] = normalize(value)
+  value: Array<Plugin<Types<T>, T>>
+): Array<Required<Plugin<Types<T>, T>>> => {
+  const records: Array<Required<Plugin<Types<T>, T>>> = normalize(value)
 
   records.forEach(record => {
     if (!isType(record[Options.Type])) {
@@ -302,7 +300,7 @@ class Lens<T extends Settings> {
 
   public readonly dispatch = (
     action?: Action,
-    ...plugins: Plugin<Types<T>, T>[]
+    ...plugins: Array<Plugin<Types<T>, T>>
   ) => {
     if (plugins.length !== 0) {
       this.register(normalizeRecords(plugins))
@@ -321,7 +319,9 @@ class Lens<T extends Settings> {
     return this.interfaces()
   }
 
-  public readonly register = (records: Required<Plugin<Types<T>, T>>[]) => {
+  public readonly register = (
+    records: Array<Required<Plugin<Types<T>, T>>>
+  ) => {
     this.setRecords(records)
 
     this.state.initialState = Object.assign(
@@ -378,8 +378,8 @@ class Lens<T extends Settings> {
       record => disabled.indexOf(record) === -1
     )
 
-    const keys: (string | number | symbol)[] = disabled.reduce(
-      (prev: (string | number | symbol)[], record) => {
+    const keys: Array<string | number | symbol> = disabled.reduce(
+      (prev: Array<string | number | symbol>, record) => {
         return prev.concat(record[Options.Keys])
       },
       []
@@ -402,14 +402,14 @@ class Lens<T extends Settings> {
     Object.keys(combinedInterfaces)
       .filter(key => keys.includes(key))
       .forEach(key => {
-        // tslint:disable-next-line: no-dynamic-delete
+        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
         delete combinedInterfaces[key]
       })
 
     return combinedInterfaces
   }
 
-  private setRecords(records: Required<Plugin<Types<T>, T>>[]) {
+  private setRecords(records: Array<Required<Plugin<Types<T>, T>>>) {
     records.forEach(record => {
       this.state.records.push(record)
 
@@ -420,9 +420,8 @@ class Lens<T extends Settings> {
   }
 }
 
-// tslint:disable-next-line: max-func-body-length
 export const builder = <T extends Settings>(
-  value: Plugin<Types<T>, T>[]
+  value: Array<Plugin<Types<T>, T>>
 ): (() => Next<T>) => {
   const normalized = normalizeRecords(value)
 

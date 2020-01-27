@@ -26,7 +26,10 @@ export const email = builder<Settings>([
     [Options.Once]: true,
     [Options.Keys]: ['to'],
     [Options.Reducer]: log => ({
-      to: get(find(log, action => action.type === SYMBOL_TO), 'payload')
+      to: get(
+        find(log, action => action.type === SYMBOL_TO),
+        'payload'
+      )
     }),
     [Options.Interface]: dispatch => ({
       to<T extends string>(value: T) {
@@ -60,7 +63,10 @@ export const email = builder<Settings>([
     [Options.Keys]: ['body'],
     [Options.Dependencies]: () => [SYMBOL_TO, SYMBOL_SUBJECT],
     [Options.Reducer]: log => ({
-      body: get(find(log, action => action.type === SYMBOL_BODY), 'payload')
+      body: get(
+        find(log, action => action.type === SYMBOL_BODY),
+        'payload'
+      )
     }),
     [Options.Interface]: dispatch => ({
       body<T extends string>(value: T) {
@@ -100,7 +106,9 @@ export const email = builder<Settings>([
       )
     }),
     [Options.Interface]: dispatch => ({
-      plugin<T extends Types<Settings>>(...plugins: Plugin<T, Settings>[]) {
+      plugin<T extends Types<Settings>>(
+        ...plugins: Array<Plugin<T, Settings>>
+      ) {
         return dispatch<ActionPlugin<T[]>>(
           { type: SYMBOL_PLUGIN, payload: map(plugins, p => p[Options.Type]) },
           ...plugins
