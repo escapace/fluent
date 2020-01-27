@@ -6,14 +6,14 @@ import { Settings } from './types'
 
 export const SYMBOL_PLUGIN = Symbol.for('Plugin')
 
-export interface ActionPlugin<T extends Types<Settings>[]> {
+export interface ActionPlugin<T extends Array<Types<Settings>>> {
   type: typeof SYMBOL_PLUGIN
   payload: T
 }
 
 declare module './types' {
   export interface State {
-    plugins: Types<Settings>[]
+    plugins: Array<Types<Settings>>
   }
 
   export interface InitialState {
@@ -49,7 +49,7 @@ declare module './types' {
     ): Next<Settings, T, ActionPlugin<Array<A | B | C | D>>>
 
     plugin<U extends Types<Settings>>(
-      ...payload: Plugin<U, Settings>[]
+      ...payload: Array<Plugin<U, Settings>>
     ): Next<Settings, T, ActionPlugin<U[]>>
   }
 
