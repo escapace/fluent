@@ -375,7 +375,7 @@ class Lens<T extends Settings> {
   private interfaces(): {} {
     const disabled = this.disabled()
     const enabled = this.state.records.filter(
-      record => disabled.indexOf(record) === -1
+      record => !disabled.includes(record)
     )
 
     const keys: Array<string | number | symbol> = disabled.reduce(
@@ -413,7 +413,7 @@ class Lens<T extends Settings> {
     records.forEach(record => {
       this.state.records.push(record)
 
-      if (this.state.reducers.indexOf(record[Options.Reducer]) === -1) {
+      if (!this.state.reducers.includes(record[Options.Reducer])) {
         this.state.reducers.push(record[Options.Reducer])
       }
     })
