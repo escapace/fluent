@@ -6,7 +6,7 @@
   "browser": "lib/umd/index.js",
   "bugs": "https://github.com/escapace/fluent/issues",
   "dependencies": {
-    "@escapace/typelevel": "^0.5.0",
+    "@escapace/typelevel": "^0.6.0",
     "lodash": "4.17.15",
     "tslib": "1.11.0"
   },
@@ -81,9 +81,9 @@
   },
   "repository": "escapace/fluent",
   "scripts": {
-    "build": "recce build -e src/index.ts",
+    "build": "npx recce build -e src/index.ts",
     "lint": "eslint 'src/**/*.ts' 'test/**/*.ts'",
-    "test": "recce test -p tsconfig-test.json --browser 'test/**.spec.ts' --node 'test/**.spec.ts' --reporter lcov --reporter text --coverage-exclude 'test/**/*.ts'",
+    "test": "npx recce test -p tsconfig-test.json --browser 'test/**.spec.ts' --node 'test/**.spec.ts' --reporter lcov --reporter text --coverage-exclude 'test/**/*.ts'",
     "typecheck": "tsc -p tsconfig-test.json --noEmit"
   },
   "sideEffects": false,
