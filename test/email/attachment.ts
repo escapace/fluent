@@ -39,7 +39,7 @@ export const attachment: Plugin<typeof SYMBOL_ATTACHMENT, Settings> = {
   [Options.Keys]: ['attachment'],
   [Options.Dependencies]: [SYMBOL_SUBJECT],
   [Options.Enabled]: (_, state) => includes(state.plugins, SYMBOL_ATTACHMENT),
-  [Options.Interface]: dispatch => ({
+  [Options.Interface]: (dispatch) => ({
     attachment(value: Buffer) {
       return dispatch<ActionAttachment>({
         type: SYMBOL_ATTACHMENT,

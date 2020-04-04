@@ -200,7 +200,7 @@ const some = <T>(
 const normalize = <T extends Settings>(
   records: Array<Plugin<Types<T>, T>>
 ): Array<Required<Plugin<Types<T>, T>>> =>
-  records.map(record => ({
+  records.map((record) => ({
     [Options.Keys]: [],
     [Options.Dependencies]: [],
     [Options.Enabled]: () => true,
@@ -223,7 +223,7 @@ const normalizeRecords = <T extends Settings>(
 ): Array<Required<Plugin<Types<T>, T>>> => {
   const records: Array<Required<Plugin<Types<T>, T>>> = normalize(value)
 
-  records.forEach(record => {
+  records.forEach((record) => {
     if (!isType(record[Options.Type])) {
       throw new Error('Not valid [Options.Type]')
     }
@@ -326,7 +326,7 @@ class Lens<T extends Settings> {
 
     this.state.initialState = Object.assign(
       {},
-      ...this.state.records.map(record => record[Options.InitialState])
+      ...this.state.records.map((record) => record[Options.InitialState])
     )
   }
 
@@ -341,16 +341,19 @@ class Lens<T extends Settings> {
               this.state.state
             )
           : record[Options.Dependencies],
-        type => some(this.state.log, action => action.type === type)
+        (type) => some(this.state.log, (action) => action.type === type)
       ),
     () => record[Options.Enabled](this.state.log, this.state.state),
     () =>
       record[Options.Once]
-        ? !some(this.state.log, action => action.type === record[Options.Type])
+        ? !some(
+            this.state.log,
+            (action) => action.type === record[Options.Type]
+          )
         : true,
     () =>
-      !some(record[Options.Conflicts], type =>
-        some(this.state.log, action => action.type === type)
+      !some(record[Options.Conflicts], (type) =>
+        some(this.state.log, (action) => action.type === type)
       )
   ]
 
@@ -358,13 +361,13 @@ class Lens<T extends Settings> {
     this.state.state = Object.assign(
       {},
       this.state.initialState,
-      ...this.state.reducers.map(reducer => reducer(this.state.log))
+      ...this.state.reducers.map((reducer) => reducer(this.state.log))
     )
   }
 
   private disabled(): Array<Required<Plugin<Types<T>, T>>> {
     return this.state.records.filter(
-      record =>
+      (record) =>
         !this.tests(record).reduce(
           (prev, curr) => (prev ? curr() : false),
           true as boolean
@@ -375,7 +378,7 @@ class Lens<T extends Settings> {
   private interfaces(): {} {
     const disabled = this.disabled()
     const enabled = this.state.records.filter(
-      record => !disabled.includes(record)
+      (record) => !disabled.includes(record)
     )
 
     const keys: Array<string | number | symbol> = disabled.reduce(
@@ -390,7 +393,7 @@ class Lens<T extends Settings> {
         [SYMBOL_LOG]: this.state.log,
         [SYMBOL_STATE]: this.state.state
       },
-      ...enabled.map(record =>
+      ...enabled.map((record) =>
         record[Options.Interface](
           this.dispatch,
           this.state.log,
@@ -400,8 +403,8 @@ class Lens<T extends Settings> {
     )
 
     Object.keys(combinedInterfaces)
-      .filter(key => keys.includes(key))
-      .forEach(key => {
+      .filter((key) => keys.includes(key))
+      .forEach((key) => {
         // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
         delete combinedInterfaces[key]
       })
@@ -410,7 +413,7 @@ class Lens<T extends Settings> {
   }
 
   private setRecords(records: Array<Required<Plugin<Types<T>, T>>>) {
-    records.forEach(record => {
+    records.forEach((record) => {
       this.state.records.push(record)
 
       if (!this.state.reducers.includes(record[Options.Reducer])) {

@@ -25,13 +25,13 @@ export const email = builder<Settings>([
     [Options.Type]: SYMBOL_TO,
     [Options.Once]: true,
     [Options.Keys]: ['to'],
-    [Options.Reducer]: log => ({
+    [Options.Reducer]: (log) => ({
       to: get(
-        find(log, action => action.type === SYMBOL_TO),
+        find(log, (action) => action.type === SYMBOL_TO),
         'payload'
       )
     }),
-    [Options.Interface]: dispatch => ({
+    [Options.Interface]: (dispatch) => ({
       to<T extends string>(value: T) {
         return dispatch<ActionTo<T>>({ type: SYMBOL_TO, payload: value })
       }
@@ -42,13 +42,13 @@ export const email = builder<Settings>([
     [Options.Once]: true,
     [Options.Keys]: ['subject'],
     [Options.Dependencies]: [SYMBOL_TO],
-    [Options.Reducer]: log => ({
+    [Options.Reducer]: (log) => ({
       subject: get(
-        find(log, action => action.type === SYMBOL_SUBJECT),
+        find(log, (action) => action.type === SYMBOL_SUBJECT),
         'payload'
       )
     }),
-    [Options.Interface]: dispatch => ({
+    [Options.Interface]: (dispatch) => ({
       subject<T extends string>(value: T) {
         return dispatch<ActionSubject<T>>({
           type: SYMBOL_SUBJECT,
@@ -62,13 +62,13 @@ export const email = builder<Settings>([
     [Options.Once]: true,
     [Options.Keys]: ['body'],
     [Options.Dependencies]: () => [SYMBOL_TO, SYMBOL_SUBJECT],
-    [Options.Reducer]: log => ({
+    [Options.Reducer]: (log) => ({
       body: get(
-        find(log, action => action.type === SYMBOL_BODY),
+        find(log, (action) => action.type === SYMBOL_BODY),
         'payload'
       )
     }),
-    [Options.Interface]: dispatch => ({
+    [Options.Interface]: (dispatch) => ({
       body<T extends string>(value: T) {
         return dispatch<ActionBody<T>>({ type: SYMBOL_BODY, payload: value })
       }
@@ -78,15 +78,15 @@ export const email = builder<Settings>([
     [Options.Type]: SYMBOL_SEND,
     [Options.Once]: true,
     [Options.Keys]: ['send'],
-    [Options.Reducer]: log => ({
+    [Options.Reducer]: (log) => ({
       sent: get(
-        find(log, action => action.type === SYMBOL_SEND),
+        find(log, (action) => action.type === SYMBOL_SEND),
         'payload',
         false
       )
     }),
     [Options.Enabled]: (_, state) => isString(state.body),
-    [Options.Interface]: dispatch => ({
+    [Options.Interface]: (dispatch) => ({
       send() {
         return dispatch<ActionSend>({ type: SYMBOL_SEND, payload: true })
       }
@@ -97,20 +97,23 @@ export const email = builder<Settings>([
     [Options.Once]: false,
     [Options.Keys]: ['plugin'],
     [Options.Conflicts]: [SYMBOL_SEND],
-    [Options.Reducer]: log => ({
+    [Options.Reducer]: (log) => ({
       plugins: flatten(
         map(
-          filter(log, action => action.type === SYMBOL_PLUGIN),
-          action => action.payload
+          filter(log, (action) => action.type === SYMBOL_PLUGIN),
+          (action) => action.payload
         )
       )
     }),
-    [Options.Interface]: dispatch => ({
+    [Options.Interface]: (dispatch) => ({
       plugin<T extends Types<Settings>>(
         ...plugins: Array<Plugin<T, Settings>>
       ) {
         return dispatch<ActionPlugin<T[]>>(
-          { type: SYMBOL_PLUGIN, payload: map(plugins, p => p[Options.Type]) },
+          {
+            type: SYMBOL_PLUGIN,
+            payload: map(plugins, (p) => p[Options.Type])
+          },
           ...plugins
         )
       }
