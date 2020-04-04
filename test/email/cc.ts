@@ -51,16 +51,16 @@ export const cc: Plugin<typeof SYMBOL_CC, Settings> = {
   [Options.Keys]: ['cc'],
   [Options.Dependencies]: [SYMBOL_TO],
   [Options.Enabled]: (_, state) => includes(state.plugins, SYMBOL_CC),
-  [Options.Interface]: dispatch => ({
+  [Options.Interface]: (dispatch) => ({
     cc<T extends string>(value: T) {
       return dispatch<ActionCC<T>>({ type: SYMBOL_CC, payload: value })
     }
   }),
-  [Options.Reducer]: log => ({
+  [Options.Reducer]: (log) => ({
     cc: map(
-      filter(log, action => action.type === SYMBOL_CC),
+      filter(log, (action) => action.type === SYMBOL_CC),
       // tslint:disable-next-line: no-unsafe-any
-      action => action.payload
+      (action) => action.payload
     )
   })
 }

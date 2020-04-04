@@ -15,7 +15,7 @@ describe('failure-modes', () => {
           [Options.Once]: true,
           // [Options.Keys]: ['to'],
           [Options.Reducer]: () => ({}),
-          [Options.Interface]: _ => ({
+          [Options.Interface]: (_) => ({
             noop() {
               noop()
             }
@@ -34,7 +34,7 @@ describe('failure-modes', () => {
           [Options.Once]: true,
           // [Options.Keys]: ['to'],
           [Options.Reducer]: () => ({}),
-          [Options.Interface]: _ => ({
+          [Options.Interface]: (_) => ({
             noop() {
               noop()
             }
@@ -53,7 +53,7 @@ describe('failure-modes', () => {
           [Options.Once]: ('string' as unknown) as boolean,
           // [Options.Keys]: ['to'],
           [Options.Reducer]: () => ({}),
-          [Options.Interface]: _ => ({
+          [Options.Interface]: (_) => ({
             noop() {
               noop()
             }
@@ -73,7 +73,7 @@ describe('failure-modes', () => {
           // tslint:disable-next-line: no-any
           [Options.Dependencies]: [noop] as any,
           [Options.Reducer]: () => ({}),
-          [Options.Interface]: _ => ({
+          [Options.Interface]: (_) => ({
             noop() {
               noop()
             }
@@ -93,7 +93,7 @@ describe('failure-modes', () => {
           // tslint:disable-next-line: no-any
           [Options.Conflicts]: [noop] as any,
           [Options.Reducer]: () => ({}),
-          [Options.Interface]: _ => ({
+          [Options.Interface]: (_) => ({
             noop() {
               noop()
             }
@@ -113,7 +113,7 @@ describe('failure-modes', () => {
           // tslint:disable-next-line: no-any
           [Options.Enabled]: 'string' as any,
           [Options.Reducer]: () => ({}),
-          [Options.Interface]: _ => ({
+          [Options.Interface]: (_) => ({
             noop() {
               noop()
             }
@@ -132,7 +132,7 @@ describe('failure-modes', () => {
           [Options.Once]: true,
           // tslint:disable-next-line: no-any
           [Options.Reducer]: 'string' as any,
-          [Options.Interface]: _ => ({
+          [Options.Interface]: (_) => ({
             noop() {
               noop()
             }
@@ -151,7 +151,7 @@ describe('failure-modes', () => {
           [Options.Once]: true,
           // tslint:disable-next-line: no-any
           [Options.InitialState]: noop as any,
-          [Options.Interface]: _ => ({
+          [Options.Interface]: (_) => ({
             noop() {
               noop()
             }
@@ -168,7 +168,7 @@ describe('failure-modes', () => {
         {
           [Options.Type]: SYMBOL_TO,
           [Options.Once]: true,
-          [Options.Interface]: dispatch => ({
+          [Options.Interface]: (dispatch) => ({
             to(payload: string) {
               dispatch({ type: (noop as unknown) as typeof SYMBOL_TO, payload })
             }

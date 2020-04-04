@@ -74,9 +74,7 @@ describe('email', () => {
   })
 
   it('stage 2', () => {
-    const test = email()
-      .to('john.doe@example.com')
-      .subject('Hello World')
+    const test = email().to('john.doe@example.com').subject('Hello World')
 
     const _log: Array<
       ActionTo<'john.doe@example.com'> | ActionSubject<'Hello World'>
