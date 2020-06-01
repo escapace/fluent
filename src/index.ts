@@ -9,7 +9,7 @@ import {
   isString,
   isSymbol,
   isUndefined
-} from 'lodash'
+} from 'lodash-es'
 
 export interface Action<T extends string | number | symbol = any, U = any> {
   type: T
