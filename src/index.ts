@@ -308,7 +308,9 @@ class Lens<T extends Settings> {
 
     if (!isUndefined(action)) {
       if (isPlainObject(action) && isType(action.type)) {
-        this.state.log.unshift(action)
+        const updatedLog = [action, ...this.state.log]
+
+        this.state.log = updatedLog
       } else {
         throw new Error(`Invalid FSA type`)
       }
@@ -368,9 +370,9 @@ class Lens<T extends Settings> {
   private disabled(): Array<Required<Plugin<Types<T>, T>>> {
     return this.state.records.filter(
       (record) =>
-        !this.tests(record).reduce(
+        !this.tests(record).reduce<boolean>(
           (prev, curr) => (prev ? curr() : false),
-          true as boolean
+          true
         )
     )
   }
