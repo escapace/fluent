@@ -1,12 +1,41 @@
+import { TL } from '@escapace/typelevel'
 import { assert } from 'chai'
-
-import { Options, builder } from '../src'
-
-import { SYMBOL_TO, Settings } from './email/types'
-
 import { noop } from 'lodash'
+import { builder, log, Options, SYMBOL_LOG, SYMBOL_STATE, state } from '../src'
+import { email } from './email'
+import { ActionTo, InitialState, Settings, SYMBOL_TO } from './email/types'
 
 describe('failure-modes', () => {
+  it('mutation', () => {
+    const instance = email()
+
+    instance.to('jane.doe@example.com')
+
+    const test = instance.to('john.doe@example.com')
+
+    const _log: Array<ActionTo<'john.doe@example.com'>> = log(test)
+    const _state: TL.Assign<
+      InitialState,
+      { to: 'john.doe@example.com' }
+    > = state(test)
+
+    assert.isObject(test)
+    assert.hasAllKeys(test, ['subject', 'plugin', SYMBOL_LOG, SYMBOL_STATE])
+    assert.isFunction(test.subject)
+    assert.lengthOf(_log, 1)
+    assert.deepInclude(_log, {
+      type: SYMBOL_TO,
+      payload: 'john.doe@example.com'
+    })
+    assert.deepEqual(_state, {
+      body: undefined,
+      plugins: [],
+      sent: false,
+      subject: undefined,
+      to: 'john.doe@example.com'
+    })
+  })
+
   it('does not throw', () => {
     const test = () =>
       builder<Settings>([

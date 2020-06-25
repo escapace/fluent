@@ -289,141 +289,118 @@ const normalizeRecords = <T extends Settings>(
   return records
 }
 
-class Lens<T extends Settings> {
-  private readonly state: LocalState<T> = {
-    records: [],
-    reducers: [],
-    initialState: {},
-    state: {},
-    log: []
-  }
+const tests = <T extends Settings>(
+  state: LocalState<T>,
+  record: Required<Plugin<Types<T>, T>>
+): Array<() => boolean> => [
+  () =>
+    every(
+      isFunction(record[Options.Dependencies])
+        ? (record[Options.Dependencies] as Function)(state.log, state.state)
+        : record[Options.Dependencies],
+      (type) => some(state.log, (action) => action.type === type)
+    ),
+  () => record[Options.Enabled](state.log, state.state),
+  () =>
+    record[Options.Once]
+      ? !some(state.log, (action) => action.type === record[Options.Type])
+      : true,
+  () =>
+    !some(record[Options.Conflicts], (type) =>
+      some(state.log, (action) => action.type === type)
+    )
+]
 
-  public readonly dispatch = (
-    action?: Action,
-    ...plugins: Array<Plugin<Types<T>, T>>
-  ) => {
-    if (plugins.length !== 0) {
-      this.register(normalizeRecords(plugins))
-    }
+const interfaces = <T extends Settings>(state: LocalState<T>): {} => {
+  const disabled = state.records.filter(
+    (record) =>
+      !tests(state, record).reduce<boolean>(
+        (prev, curr) => (prev ? curr() : false),
+        true
+      )
+  )
+
+  const enabled = state.records.filter((record) => !disabled.includes(record))
+
+  const keys: Array<string | number | symbol> = disabled.reduce(
+    (prev: Array<string | number | symbol>, record) => {
+      return prev.concat(record[Options.Keys])
+    },
+    []
+  )
+
+  const combinedInterfaces = Object.assign(
+    {
+      [SYMBOL_LOG]: state.log,
+      [SYMBOL_STATE]: state.state
+    },
+    ...enabled.map((record) =>
+      record[Options.Interface](dispatchFactory(state), state.log, state.state)
+    )
+  )
+
+  Object.keys(combinedInterfaces)
+    .filter((key) => keys.includes(key))
+    .forEach((key) => {
+      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+      delete combinedInterfaces[key]
+    })
+
+  return combinedInterfaces
+}
+
+const dispatchFactory = <T extends Settings>(_state: LocalState<T>) => {
+  return (action?: Action, ...plugins: Array<Plugin<Types<T>, T>>) => {
+    const state =
+      plugins.length !== 0
+        ? register(normalizeRecords(plugins), Object.assign({}, _state))
+        : Object.assign({}, _state)
 
     if (!isUndefined(action)) {
       if (isPlainObject(action) && isType(action.type)) {
-        const updatedLog = [action, ...this.state.log]
-
-        this.state.log = updatedLog
+        state.log = [action, ...state.log]
       } else {
         throw new Error(`Invalid FSA type`)
       }
     }
 
-    this.setState()
-
-    return this.interfaces()
-  }
-
-  public readonly register = (
-    records: Array<Required<Plugin<Types<T>, T>>>
-  ) => {
-    this.setRecords(records)
-
-    this.state.initialState = Object.assign(
+    state.state = Object.assign(
       {},
-      ...this.state.records.map((record) => record[Options.InitialState])
-    )
-  }
-
-  private readonly tests = (
-    record: Required<Plugin<Types<T>, T>>
-  ): Array<() => boolean> => [
-    () =>
-      every(
-        isFunction(record[Options.Dependencies])
-          ? (record[Options.Dependencies] as Function)(
-              this.state.log,
-              this.state.state
-            )
-          : record[Options.Dependencies],
-        (type) => some(this.state.log, (action) => action.type === type)
-      ),
-    () => record[Options.Enabled](this.state.log, this.state.state),
-    () =>
-      record[Options.Once]
-        ? !some(
-            this.state.log,
-            (action) => action.type === record[Options.Type]
-          )
-        : true,
-    () =>
-      !some(record[Options.Conflicts], (type) =>
-        some(this.state.log, (action) => action.type === type)
-      )
-  ]
-
-  private setState() {
-    this.state.state = Object.assign(
-      {},
-      this.state.initialState,
-      ...this.state.reducers.map((reducer) => reducer(this.state.log))
-    )
-  }
-
-  private disabled(): Array<Required<Plugin<Types<T>, T>>> {
-    return this.state.records.filter(
-      (record) =>
-        !this.tests(record).reduce<boolean>(
-          (prev, curr) => (prev ? curr() : false),
-          true
-        )
-    )
-  }
-
-  private interfaces(): {} {
-    const disabled = this.disabled()
-    const enabled = this.state.records.filter(
-      (record) => !disabled.includes(record)
+      state.initialState,
+      ...state.reducers.map((reducer) => reducer(state.log))
     )
 
-    const keys: Array<string | number | symbol> = disabled.reduce(
-      (prev: Array<string | number | symbol>, record) => {
-        return prev.concat(record[Options.Keys])
-      },
-      []
-    )
-
-    const combinedInterfaces = Object.assign(
-      {
-        [SYMBOL_LOG]: this.state.log,
-        [SYMBOL_STATE]: this.state.state
-      },
-      ...enabled.map((record) =>
-        record[Options.Interface](
-          this.dispatch,
-          this.state.log,
-          this.state.state
-        )
-      )
-    )
-
-    Object.keys(combinedInterfaces)
-      .filter((key) => keys.includes(key))
-      .forEach((key) => {
-        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-        delete combinedInterfaces[key]
-      })
-
-    return combinedInterfaces
-  }
-
-  private setRecords(records: Array<Required<Plugin<Types<T>, T>>>) {
-    records.forEach((record) => {
-      this.state.records.push(record)
-
-      if (!this.state.reducers.includes(record[Options.Reducer])) {
-        this.state.reducers.push(record[Options.Reducer])
-      }
-    })
+    return interfaces(state)
   }
 }
+
+const register = <T extends Settings>(
+  records: Array<Required<Plugin<Types<T>, T>>>,
+  state: LocalState<T>
+): LocalState<T> => {
+  records.forEach((record) => {
+    state.records = [...state.records, record]
+
+    if (!state.reducers.includes(record[Options.Reducer])) {
+      state.reducers = [...state.reducers, record[Options.Reducer]]
+    }
+  })
+
+  state.initialState = Object.assign(
+    {},
+    ...state.records.map((record) => record[Options.InitialState])
+  )
+
+  return state
+}
+
+const initialLocalStateFactory = <T extends Settings>(): LocalState<T> => ({
+  records: [],
+  reducers: [],
+  initialState: {},
+  state: {},
+  log: []
+})
 
 export const builder = <T extends Settings>(
   value: Array<Plugin<Types<T>, T>>
@@ -431,10 +408,8 @@ export const builder = <T extends Settings>(
   const normalized = normalizeRecords(value)
 
   return () => {
-    const lens = new Lens<T>()
-
-    lens.register(normalized)
-
-    return (lens.dispatch() as unknown) as Next<T>
+    return (dispatchFactory(
+      register(normalized, initialLocalStateFactory())
+    )() as unknown) as Next<T>
   }
 }
