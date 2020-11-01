@@ -1,5 +1,3 @@
-/* tslint:disable completed-docs */
-
 import $ from '@escapace/typelevel'
 import {
   Action,

@@ -61,7 +61,6 @@ export const cc: Plugin<typeof SYMBOL_CC, Settings> = {
   [Options.Reducer]: (log) => ({
     cc: map(
       filter(log, (action) => action.type === SYMBOL_CC),
-      // tslint:disable-next-line: no-unsafe-any
       (action) => action.payload
     )
   })
