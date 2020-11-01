@@ -3,7 +3,7 @@
     {
       "files": "*.js",
       "options": {
-        "parser": "babylon",
+        "parser": "babel",
         "printWidth": 80,
         "semi": false,
         "singleQuote": true,
@@ -11,7 +11,7 @@
       }
     },
     {
-      "files": "*.ts",
+      "files": ["*.ts", "*.tsx"],
       "options": {
         "parser": "typescript",
         "printWidth": 80,

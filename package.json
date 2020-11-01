@@ -11,34 +11,35 @@
     "tslib": "2.0.3"
   },
   "devDependencies": {
-    "@commitlint/cli": "9.0.1",
-    "@commitlint/config-conventional": "9.0.1",
-    "@types/chai": "4.2.11",
+    "@commitlint/cli": "11.0.0",
+    "@commitlint/config-conventional": "11.0.0",
+    "@ls-lint/ls-lint": "1.9.2",
+    "@types/chai": "4.2.14",
     "@types/lodash-es": "4.17.3",
-    "@types/mocha": "7.0.2",
-    "@types/node": "14.0.14",
-    "@typescript-eslint/eslint-plugin": "3.4.0",
-    "@typescript-eslint/parser": "3.4.0",
+    "@types/mocha": "8.0.3",
+    "@types/node": "14.14.6",
+    "@typescript-eslint/eslint-plugin": "4.6.0",
+    "@typescript-eslint/parser": "4.6.0",
     "chai": "4.2.0",
-    "codecov": "3.7.1",
-    "eslint": "7.3.1",
-    "eslint-config-escapace": "3.1.2",
-    "eslint-config-prettier": "6.11.0",
-    "eslint-config-standard-with-typescript": "18.0.2",
-    "eslint-plugin-import": "2.21.2",
-    "eslint-plugin-jsdoc": "28.5.1",
+    "codecov": "3.8.0",
+    "eslint": "7.12.1",
+    "eslint-config-escapace": "3.2.0",
+    "eslint-config-prettier": "6.15.0",
+    "eslint-config-standard-with-typescript": "19.0.1",
+    "eslint-plugin-import": "2.22.1",
+    "eslint-plugin-jsdoc": "30.7.6",
     "eslint-plugin-no-null": "1.0.2",
     "eslint-plugin-node": "11.1.0",
     "eslint-plugin-prettier": "3.1.4",
     "eslint-plugin-promise": "4.2.1",
-    "eslint-plugin-standard": "4.0.1",
-    "husky": "4.2.5",
-    "lint-staged": "10.2.11",
-    "prettier": "2.0.5",
+    "eslint-plugin-standard": "4.0.2",
+    "husky": "4.3.0",
+    "lint-staged": "10.5.1",
+    "prettier": "2.1.2",
     "rimraf": "3.0.2",
-    "semantic-release": "17.1.0",
-    "syncpack": "5.0.3",
-    "typescript": "3.9.5"
+    "semantic-release": "17.2.2",
+    "syncpack": "5.6.10",
+    "typescript": "4.0.5"
   },
   "engines": {
     "node": ">=10.16.0"
@@ -47,32 +48,12 @@
     "lib"
   ],
   "homepage": "https://github.com/escapace/fluent",
-  "husky": {
-    "hooks": {
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
-      "pre-commit": "lint-staged && npm run typecheck && npm run test"
-    }
-  },
   "keywords": [
     "DSL",
     "Fluent",
     "TypeScript"
   ],
   "license": "MPL-2.0",
-  "lint-staged": {
-    "package.json": [
-      "syncpack-format --source",
-      "syncpack-set-semver-ranges --dev --source"
-    ],
-    "{src,test}/**/*.ts": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "{src,test}/**/*.js": [
-      "eslint --fix",
-      "prettier --write"
-    ]
-  },
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",
   "private": false,
@@ -82,7 +63,7 @@
   "repository": "escapace/fluent",
   "scripts": {
     "build": "npx recce build -e src/index.ts",
-    "lint": "eslint 'src/**/*.ts' 'test/**/*.ts'",
+    "lint": "ls-lint && eslint 'src/**/*.ts' 'test/**/*.ts'",
     "test": "npx recce test -p tsconfig-test.json --browser 'test/**.spec.ts' --node 'test/**.spec.ts' --reporter lcov --reporter text --coverage-exclude 'test/**/*.ts'",
     "typecheck": "tsc -p tsconfig-test.json --noEmit"
   },

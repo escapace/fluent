@@ -59,6 +59,7 @@ declare module './types' {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   export interface Category<T extends Model<State>> {
     [SYMBOL_PLUGIN]: {
       [Options.Type]: typeof SYMBOL_PLUGIN
