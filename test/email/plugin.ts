@@ -53,9 +53,9 @@ declare module './types' {
     ): Next<Settings, T, ActionPlugin<U[]>>
   }
 
-  export interface Reducer<T extends Action> {
+  export interface Reducer<T extends Action[]> {
     [SYMBOL_PLUGIN]: {
-      plugins: Array<$.Values<Payload<T, typeof SYMBOL_PLUGIN>>>
+      plugins: Array<$.Values<Payload<$.Values<T>, typeof SYMBOL_PLUGIN>>>
     }
   }
 

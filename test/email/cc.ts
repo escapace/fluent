@@ -26,8 +26,10 @@ declare module './types' {
     cc<U extends string>(payload: U): Next<Settings, T, ActionCC<U>>
   }
 
-  export interface Reducer<T extends Action> {
-    [SYMBOL_CC]: { cc: Array<Payload<T, typeof SYMBOL_CC>> | undefined }
+  export interface Reducer<T extends Action[]> {
+    [SYMBOL_CC]: {
+      cc: Array<Payload<$.Values<T>, typeof SYMBOL_CC>> | undefined
+    }
   }
 
   export interface Category<T extends Model<State>> {

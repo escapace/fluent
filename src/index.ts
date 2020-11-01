@@ -97,11 +97,7 @@ export type Reducer<T extends Settings, U extends Action[]> = $.Assign<
   T[Options.InitialState],
   $.Cast<
     $.To.Intersection<
-      $.Properties<
-        $.Type<T[Options.Reducer], $.Values<U>>,
-        $.Values<U>['type'],
-        {}
-      >
+      $.Properties<$.Type<T[Options.Reducer], U>, $.Values<U>['type'], {}>
     >,
     {}
   >

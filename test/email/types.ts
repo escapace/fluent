@@ -94,11 +94,11 @@ export interface Category<T extends Model<State>> {
   }
 }
 
-export interface Reducer<T extends Action> {
-  [SYMBOL_TO]: { to: Payload<T, typeof SYMBOL_TO> }
-  [SYMBOL_SUBJECT]: { subject: Payload<T, typeof SYMBOL_SUBJECT> }
-  [SYMBOL_BODY]: { body: Payload<T, typeof SYMBOL_BODY> }
-  [SYMBOL_SEND]: { sent: Payload<T, typeof SYMBOL_SEND> }
+export interface Reducer<T extends Action[]> {
+  [SYMBOL_TO]: { to: Payload<$.Values<T>, typeof SYMBOL_TO> }
+  [SYMBOL_SUBJECT]: { subject: Payload<$.Values<T>, typeof SYMBOL_SUBJECT> }
+  [SYMBOL_BODY]: { body: Payload<$.Values<T>, typeof SYMBOL_BODY> }
+  [SYMBOL_SEND]: { sent: Payload<$.Values<T>, typeof SYMBOL_SEND> }
 }
 
 export interface InitialState {
@@ -120,6 +120,6 @@ declare module '@escapace/typelevel/hkt' {
   interface URI2HKT<A> {
     [EMAIL_INTERFACE]: Email<$.Cast<A, Model<State>>>
     [EMAIL_SPECIFICATION]: Category<$.Cast<A, Model<State>>>
-    [EMAIL_REDUCER]: Reducer<$.Cast<A, Action>>
+    [EMAIL_REDUCER]: Reducer<$.Cast<A, Action[]>>
   }
 }
