@@ -16,7 +16,7 @@ export interface Action<T extends string | number | symbol = any, U = any> {
   payload: U
 }
 
-export interface Model<U extends {} = any, T extends Action = any> {
+export interface Model<U extends {} = any, T extends Action[] = any> {
   log: T
   state: U
 }
@@ -53,7 +53,7 @@ export interface Specification {
 }
 
 export type Check<T extends Model, S> = S extends Specification
-  ? T['log'] extends { type: infer X }
+  ? T['log'] extends Array<{ type: infer X }>
     ? $.If<
         $.Equal<
           | S[Options.Enabled]
@@ -93,17 +93,21 @@ export type Instance<S extends Settings, T extends Model> = Fluent<
   Check<T, $.Properties<$.Type<S[Options.Specification], T>>>
 >
 
-export type Reducer<T extends Settings, U extends Action> = $.Assign<
+export type Reducer<T extends Settings, U extends Action[]> = $.Assign<
   T[Options.InitialState],
   $.Cast<
     $.To.Intersection<
-      $.Properties<$.Type<T[Options.Reducer], U>, U['type'], {}>
+      $.Properties<
+        $.Type<T[Options.Reducer], $.Values<U>>,
+        $.Values<U>['type'],
+        {}
+      >
     >,
     {}
   >
 >
 
-export interface Log<T extends Settings, U extends Action> {
+export interface Log<T extends Settings, U extends Action[]> {
   log: U
   state: Reducer<T, U>
 }
@@ -112,7 +116,8 @@ export type NextModel<
   S extends Settings,
   U extends Action,
   T extends Model
-> = Log<S, $.If<$.Is.Never<T['log']>, U, U | T['log']>>
+> = Log<S, $.If<$.Is.Never<$.Values<T['log']>>, [U], [U, ...T['log']]>>
+
 //  extends Model<infer C1, infer C2>
 //   ? Model<C1, C2>
 //   : never
@@ -166,7 +171,7 @@ export const SYMBOL_LOG = Symbol.for('ESCAPACE_FLUENT_LOG')
 export const SYMBOL_STATE = Symbol.for('ESCAPACE_FLUENT_STATE')
 
 export interface FluentInterface<T extends Model> {
-  readonly [SYMBOL_LOG]: T extends Model<any, infer U> ? U[] : []
+  readonly [SYMBOL_LOG]: T extends Model<any, infer U> ? U : []
   readonly [SYMBOL_STATE]: T extends Model<infer U> ? U : {}
 }
 
