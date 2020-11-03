@@ -50,7 +50,7 @@ describe('email', () => {
   it('stage 1', () => {
     const test = email().to('john.doe@example.com')
 
-    const _log: Array<ActionTo<'john.doe@example.com'>> = log(test)
+    const _log: [ActionTo<'john.doe@example.com'>] = log(test)
     const _state: TL.Assign<
       InitialState,
       { to: 'john.doe@example.com' }
@@ -76,9 +76,11 @@ describe('email', () => {
   it('stage 2', () => {
     const test = email().to('john.doe@example.com').subject('Hello World')
 
-    const _log: Array<
-      ActionTo<'john.doe@example.com'> | ActionSubject<'Hello World'>
-    > = log(test)
+    const _log: [
+      ActionSubject<'Hello World'>,
+      ActionTo<'john.doe@example.com'>
+    ] = log(test)
+
     const _state: TL.Assign<
       InitialState,
       { to: 'john.doe@example.com'; subject: 'Hello World' }
@@ -107,13 +109,12 @@ describe('email', () => {
       .subject('Hello World')
       .body('Totam est perferendis provident consequatur et harum autem.')
 
-    const _log: Array<
-      | ActionTo<'john.doe@example.com'>
-      | ActionSubject<'Hello World'>
-      | ActionBody<
-          'Totam est perferendis provident consequatur et harum autem.'
-        >
-    > = log(test)
+    const _log: [
+      ActionBody<'Totam est perferendis provident consequatur et harum autem.'>,
+      ActionSubject<'Hello World'>,
+      ActionTo<'john.doe@example.com'>
+    ] = log(test)
+
     const _state: TL.Assign<
       InitialState,
       {
@@ -147,14 +148,12 @@ describe('email', () => {
       .body('Totam est perferendis provident consequatur et harum autem.')
       .send()
 
-    const _log: Array<
-      | ActionTo<'john.doe@example.com'>
-      | ActionSubject<'Hello World'>
-      | ActionBody<
-          'Totam est perferendis provident consequatur et harum autem.'
-        >
-      | ActionSend
-    > = log(test)
+    const _log: [
+      ActionSend,
+      ActionBody<'Totam est perferendis provident consequatur et harum autem.'>,
+      ActionSubject<'Hello World'>,
+      ActionTo<'john.doe@example.com'>
+    ] = log(test)
     const _state: TL.Assign<
       InitialState,
       {
@@ -188,14 +187,12 @@ describe('email', () => {
       .body('Totam est perferendis provident consequatur et harum autem.')
       .send()
 
-    const _log: Array<
-      | ActionTo<'john.doe@example.com'>
-      | ActionSubject<'Hello World'>
-      | ActionBody<
-          'Totam est perferendis provident consequatur et harum autem.'
-        >
-      | ActionSend
-    > = log(test)
+    const _log: [
+      ActionSend,
+      ActionBody<'Totam est perferendis provident consequatur et harum autem.'>,
+      ActionSubject<'Hello World'>,
+      ActionTo<'john.doe@example.com'>
+    ] = log(test)
     const _state: TL.Assign<
       InitialState,
       {
@@ -229,14 +226,12 @@ describe('email', () => {
       .body('Totam est perferendis provident consequatur et harum autem.')
       .plugin(cc, attachment)
 
-    const _log: Array<
-      | ActionTo<'john.doe@example.com'>
-      | ActionSubject<'Hello World'>
-      | ActionBody<
-          'Totam est perferendis provident consequatur et harum autem.'
-        >
-      | ActionPlugin<Array<typeof SYMBOL_CC | typeof SYMBOL_ATTACHMENT>>
-    > = log(test)
+    const _log: [
+      ActionPlugin<Array<typeof SYMBOL_CC | typeof SYMBOL_ATTACHMENT>>,
+      ActionBody<'Totam est perferendis provident consequatur et harum autem.'>,
+      ActionSubject<'Hello World'>,
+      ActionTo<'john.doe@example.com'>
+    ] = log(test)
 
     const _state: TL.Assign<
       InitialState,
@@ -411,11 +406,11 @@ describe('email', () => {
 })
 
 // const qwe = email()
-//   .to('john.doe@example.com')
-//   .subject('hello')
-//   .body('hi john doe')
-//   .plugin(cc, attachment)
-//   .attachment(Buffer.from('Hi'))
+// .to('john.doe@example.com')
+// .subject('hello')
+// .body('hi john doe')
+// .plugin(cc, attachment)
+// .attachment(Buffer.from('Hi'))
 // .cc('1@example.com')
 // .cc('2@example.com')
 // .cc('3@example.com')

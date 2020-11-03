@@ -108,21 +108,14 @@ export interface Log<T extends Settings, U extends Action[]> {
   state: Reducer<T, U>
 }
 
-export type NextModel<
-  S extends Settings,
-  U extends Action,
-  T extends Model
-> = Log<S, $.If<$.Is.Never<$.Values<T['log']>>, [U], [U, ...T['log']]>>
-
-//  extends Model<infer C1, infer C2>
-//   ? Model<C1, C2>
-//   : never
-
 export type Next<
   S extends Settings,
-  T = { log: never; state: never },
+  T extends Model = { log: never; state: never },
   U extends Action = never
-> = Instance<S, NextModel<S, U, $.Cast<T, Model>>>
+> = Instance<
+  S,
+  Log<S, $.If<$.Is.Never<$.Values<T['log']>>, [U], [U, ...T['log']]>>
+>
 
 export type Payload<
   T extends Action,
