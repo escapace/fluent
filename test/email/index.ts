@@ -1,5 +1,3 @@
-/* tslint:disable: no-unsafe-any */
-
 import { Options, Plugin, Types, builder } from '../../src'
 import {
   ActionBody,
