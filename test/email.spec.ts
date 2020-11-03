@@ -29,7 +29,7 @@ describe('email', () => {
   it('stage 0', () => {
     const test = email()
 
-    const _log: never[] = log(test)
+    const _log: [never] = log(test)
     const _state: InitialState = state(test)
 
     // const qwe = _state.cc
@@ -50,7 +50,7 @@ describe('email', () => {
   it('stage 1', () => {
     const test = email().to('john.doe@example.com')
 
-    const _log: Array<ActionTo<'john.doe@example.com'>> = log(test)
+    const _log: [ActionTo<'john.doe@example.com'>] = log(test)
     const _state: TL.Assign<
       InitialState,
       { to: 'john.doe@example.com' }
@@ -76,9 +76,11 @@ describe('email', () => {
   it('stage 2', () => {
     const test = email().to('john.doe@example.com').subject('Hello World')
 
-    const _log: Array<
-      ActionTo<'john.doe@example.com'> | ActionSubject<'Hello World'>
-    > = log(test)
+    const _log: [
+      ActionSubject<'Hello World'>,
+      ActionTo<'john.doe@example.com'>
+    ] = log(test)
+
     const _state: TL.Assign<
       InitialState,
       { to: 'john.doe@example.com'; subject: 'Hello World' }
@@ -107,13 +109,12 @@ describe('email', () => {
       .subject('Hello World')
       .body('Totam est perferendis provident consequatur et harum autem.')
 
-    const _log: Array<
-      | ActionTo<'john.doe@example.com'>
-      | ActionSubject<'Hello World'>
-      | ActionBody<
-          'Totam est perferendis provident consequatur et harum autem.'
-        >
-    > = log(test)
+    const _log: [
+      ActionBody<'Totam est perferendis provident consequatur et harum autem.'>,
+      ActionSubject<'Hello World'>,
+      ActionTo<'john.doe@example.com'>
+    ] = log(test)
+
     const _state: TL.Assign<
       InitialState,
       {
@@ -147,14 +148,12 @@ describe('email', () => {
       .body('Totam est perferendis provident consequatur et harum autem.')
       .send()
 
-    const _log: Array<
-      | ActionTo<'john.doe@example.com'>
-      | ActionSubject<'Hello World'>
-      | ActionBody<
-          'Totam est perferendis provident consequatur et harum autem.'
-        >
-      | ActionSend
-    > = log(test)
+    const _log: [
+      ActionSend,
+      ActionBody<'Totam est perferendis provident consequatur et harum autem.'>,
+      ActionSubject<'Hello World'>,
+      ActionTo<'john.doe@example.com'>
+    ] = log(test)
     const _state: TL.Assign<
       InitialState,
       {
@@ -188,14 +187,12 @@ describe('email', () => {
       .body('Totam est perferendis provident consequatur et harum autem.')
       .send()
 
-    const _log: Array<
-      | ActionTo<'john.doe@example.com'>
-      | ActionSubject<'Hello World'>
-      | ActionBody<
-          'Totam est perferendis provident consequatur et harum autem.'
-        >
-      | ActionSend
-    > = log(test)
+    const _log: [
+      ActionSend,
+      ActionBody<'Totam est perferendis provident consequatur et harum autem.'>,
+      ActionSubject<'Hello World'>,
+      ActionTo<'john.doe@example.com'>
+    ] = log(test)
     const _state: TL.Assign<
       InitialState,
       {
@@ -229,14 +226,12 @@ describe('email', () => {
       .body('Totam est perferendis provident consequatur et harum autem.')
       .plugin(cc, attachment)
 
-    const _log: Array<
-      | ActionTo<'john.doe@example.com'>
-      | ActionSubject<'Hello World'>
-      | ActionBody<
-          'Totam est perferendis provident consequatur et harum autem.'
-        >
-      | ActionPlugin<Array<typeof SYMBOL_CC | typeof SYMBOL_ATTACHMENT>>
-    > = log(test)
+    const _log: [
+      ActionPlugin<Array<typeof SYMBOL_CC | typeof SYMBOL_ATTACHMENT>>,
+      ActionBody<'Totam est perferendis provident consequatur et harum autem.'>,
+      ActionSubject<'Hello World'>,
+      ActionTo<'john.doe@example.com'>
+    ] = log(test)
 
     const _state: TL.Assign<
       InitialState,
@@ -411,49 +406,49 @@ describe('email', () => {
 })
 
 // const qwe = email()
-//   .to('john.doe@example.com')
-//   .subject('hello')
-//   .body('hi john doe')
-//   .plugin(cc, attachment)
-//   .attachment(Buffer.from('Hi'))
-//   .cc('1@example.com')
-//   .cc('2@example.com')
-//   .cc('3@example.com')
-//   .cc('4@example.com')
-//   .cc('5@example.com')
-//   .cc('6@example.com')
-//   .cc('7@example.com')
-//   .cc('8@example.com')
-//   .cc('9@example.com')
-//   .cc('10@example.com')
-//   .cc('11@example.com')
-//   .cc('12@example.com')
-//   .cc('13@example.com')
-//   .cc('14@example.com')
-//   .cc('15@example.com')
-//   .cc('16@example.com')
-//   .cc('17@example.com')
-//   .cc('18@example.com')
-//   .cc('19@example.com')
-//   .cc('20@example.com')
-//   .cc('21@example.com')
-//   .cc('22@example.com')
-//   .cc('23@example.com')
-//   .cc('24@example.com')
-//   .cc('25@example.com')
-//   .cc('26@example.com')
-//   .cc('27@example.com')
-//   .cc('28@example.com')
-//   .cc('29@example.com')
-//   .cc('30@example.com')
-//   .cc('31@example.com')
-//   .cc('32@example.com')
-//   .cc('33@example.com')
-//   .cc('34@example.com')
-//   .cc('35@example.com')
-//   .cc('35@example.com')
-//   .cc('35@example.com')
-//   .cc('35@example.com')
-//   .cc('35@example.com')
-//   .cc('35@example.com')
-//   .send()
+// .to('john.doe@example.com')
+// .subject('hello')
+// .body('hi john doe')
+// .plugin(cc, attachment)
+// .attachment(Buffer.from('Hi'))
+// .cc('1@example.com')
+// .cc('2@example.com')
+// .cc('3@example.com')
+// .cc('4@example.com')
+// .cc('5@example.com')
+// .cc('6@example.com')
+// .cc('7@example.com')
+// .cc('8@example.com')
+// .cc('9@example.com')
+// .cc('10@example.com')
+// .cc('11@example.com')
+// .cc('12@example.com')
+// .cc('13@example.com')
+// .cc('14@example.com')
+// .cc('15@example.com')
+// .cc('16@example.com')
+// .cc('17@example.com')
+// .cc('18@example.com')
+// .cc('19@example.com')
+// .cc('20@example.com')
+// .cc('21@example.com')
+// .cc('22@example.com')
+// .cc('23@example.com')
+// .cc('24@example.com')
+// .cc('25@example.com')
+// .cc('26@example.com')
+// .cc('27@example.com')
+// .cc('28@example.com')
+// .cc('29@example.com')
+// .cc('30@example.com')
+// .cc('31@example.com')
+// .cc('32@example.com')
+// .cc('33@example.com')
+// .cc('34@example.com')
+// .cc('35@example.com')
+// .cc('35@example.com')
+// .cc('35@example.com')
+// .cc('35@example.com')
+// .cc('35@example.com')
+// .cc('35@example.com')
+// .send()

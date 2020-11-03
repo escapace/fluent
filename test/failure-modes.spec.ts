@@ -99,7 +99,6 @@ describe('failure-modes', () => {
         {
           [Options.Type]: SYMBOL_TO,
           [Options.Once]: true,
-          // tslint:disable-next-line: no-any
           [Options.Dependencies]: [noop] as any,
           [Options.Reducer]: () => ({}),
           [Options.Interface]: (_) => ({
@@ -119,7 +118,6 @@ describe('failure-modes', () => {
         {
           [Options.Type]: SYMBOL_TO,
           [Options.Once]: true,
-          // tslint:disable-next-line: no-any
           [Options.Conflicts]: [noop] as any,
           [Options.Reducer]: () => ({}),
           [Options.Interface]: (_) => ({
@@ -139,7 +137,6 @@ describe('failure-modes', () => {
         {
           [Options.Type]: SYMBOL_TO,
           [Options.Once]: true,
-          // tslint:disable-next-line: no-any
           [Options.Enabled]: 'string' as any,
           [Options.Reducer]: () => ({}),
           [Options.Interface]: (_) => ({
@@ -159,7 +156,6 @@ describe('failure-modes', () => {
         {
           [Options.Type]: SYMBOL_TO,
           [Options.Once]: true,
-          // tslint:disable-next-line: no-any
           [Options.Reducer]: 'string' as any,
           [Options.Interface]: (_) => ({
             noop() {
@@ -178,7 +174,6 @@ describe('failure-modes', () => {
         {
           [Options.Type]: SYMBOL_TO,
           [Options.Once]: true,
-          // tslint:disable-next-line: no-any
           [Options.InitialState]: noop as any,
           [Options.Interface]: (_) => ({
             noop() {
