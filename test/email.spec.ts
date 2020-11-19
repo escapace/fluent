@@ -15,7 +15,7 @@ import { ActionCC, SYMBOL_CC } from './email/cc'
 import { ActionAttachment, SYMBOL_ATTACHMENT } from './email/attachment'
 import { ActionPlugin, SYMBOL_PLUGIN } from './email/plugin'
 
-import { TL } from '@escapace/typelevel'
+import $ from '@escapace/typelevel'
 
 import { SYMBOL_LOG, SYMBOL_STATE, log, state } from '../src'
 
@@ -51,7 +51,7 @@ describe('email', () => {
     const test = email().to('john.doe@example.com')
 
     const _log: [ActionTo<'john.doe@example.com'>] = log(test)
-    const _state: TL.Assign<
+    const _state: $.Assign<
       InitialState,
       { to: 'john.doe@example.com' }
     > = state(test)
@@ -81,7 +81,7 @@ describe('email', () => {
       ActionTo<'john.doe@example.com'>
     ] = log(test)
 
-    const _state: TL.Assign<
+    const _state: $.Assign<
       InitialState,
       { to: 'john.doe@example.com'; subject: 'Hello World' }
     > = state(test)
@@ -115,7 +115,7 @@ describe('email', () => {
       ActionTo<'john.doe@example.com'>
     ] = log(test)
 
-    const _state: TL.Assign<
+    const _state: $.Assign<
       InitialState,
       {
         to: 'john.doe@example.com'
@@ -154,7 +154,7 @@ describe('email', () => {
       ActionSubject<'Hello World'>,
       ActionTo<'john.doe@example.com'>
     ] = log(test)
-    const _state: TL.Assign<
+    const _state: $.Assign<
       InitialState,
       {
         to: 'john.doe@example.com'
@@ -193,7 +193,7 @@ describe('email', () => {
       ActionSubject<'Hello World'>,
       ActionTo<'john.doe@example.com'>
     ] = log(test)
-    const _state: TL.Assign<
+    const _state: $.Assign<
       InitialState,
       {
         to: 'john.doe@example.com'
@@ -233,7 +233,7 @@ describe('email', () => {
       ActionTo<'john.doe@example.com'>
     ] = log(test)
 
-    const _state: TL.Assign<
+    const _state: $.Assign<
       InitialState,
       {
         to: 'john.doe@example.com'
@@ -291,7 +291,7 @@ describe('email', () => {
       | ActionCC<'justin.doe@example.com'>
     > = log(test)
 
-    const _state: TL.Assign<
+    const _state: $.Assign<
       InitialState,
       {
         to: 'john.doe@example.com'
@@ -358,7 +358,7 @@ describe('email', () => {
       | ActionAttachment
     > = log(test)
 
-    const _state: TL.Assign<
+    const _state: $.Assign<
       InitialState,
       {
         to: 'john.doe@example.com'
