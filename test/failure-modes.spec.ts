@@ -1,4 +1,4 @@
-import { TL } from '@escapace/typelevel'
+import $ from '@escapace/typelevel'
 import { assert } from 'chai'
 import { noop } from 'lodash'
 import { builder, log, Options, SYMBOL_LOG, SYMBOL_STATE, state } from '../src'
@@ -14,7 +14,7 @@ describe('failure-modes', () => {
     const test = instance.to('john.doe@example.com')
 
     const _log: Array<ActionTo<'john.doe@example.com'>> = log(test)
-    const _state: TL.Assign<
+    const _state: $.Assign<
       InitialState,
       { to: 'john.doe@example.com' }
     > = state(test)
