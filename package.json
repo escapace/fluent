@@ -7,7 +7,7 @@
   "bugs": "https://github.com/escapace/fluent/issues",
   "dependencies": {
     "@escapace/typelevel": "^1.0.0",
-    "lodash-es": "^4.17.15",
+    "lodash-es": "^4.17.20",
     "tslib": "2.0.3"
   },
   "devDependencies": {
