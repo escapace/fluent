@@ -1,72 +1,75 @@
 {
   "name": "@escapace/fluent",
-  "description": "Fluent DSL helper for TypeScript",
+  "description": "",
   "version": "0.0.0",
   "author": "escapace <opensource@escapace.com>",
-  "browser": "lib/umd/index.js",
   "bugs": "https://github.com/escapace/fluent/issues",
-  "dependencies": {
-    "@escapace/typelevel": "^1.0.0",
-    "lodash-es": "^4.17.21",
-    "tslib": "2.2.0"
-  },
   "devDependencies": {
-    "@commitlint/cli": "11.0.0",
-    "@commitlint/config-conventional": "11.0.0",
+    "@commitlint/cli": "12.1.4",
+    "@commitlint/config-conventional": "12.1.4",
     "@ls-lint/ls-lint": "1.9.2",
-    "@types/chai": "4.2.14",
-    "@types/lodash-es": "4.17.3",
-    "@types/mocha": "8.0.4",
-    "@types/node": "14.14.9",
-    "@typescript-eslint/eslint-plugin": "4.8.1",
-    "@typescript-eslint/parser": "4.8.1",
-    "chai": "4.2.0",
-    "codecov": "3.8.1",
-    "eslint": "7.13.0",
-    "eslint-config-escapace": "3.2.0",
-    "eslint-config-prettier": "6.15.0",
-    "eslint-config-standard-with-typescript": "19.0.1",
-    "eslint-plugin-import": "2.22.1",
-    "eslint-plugin-jsdoc": "30.7.8",
+    "@types/chai": "4.2.18",
+    "@types/lodash": "^4.14.170",
+    "@types/lodash-es": "^4.17.4",
+    "@types/mocha": "8.2.2",
+    "@types/node": "15.6.1",
+    "@typescript-eslint/eslint-plugin": "4.25.0",
+    "@typescript-eslint/parser": "4.25.0",
+    "c8": "7.7.2",
+    "chai": "4.3.4",
+    "codecov": "3.8.2",
+    "esbuild": "0.12.5",
+    "eslint": "7.27.0",
+    "eslint-config-escapace": "3.8.0",
+    "eslint-config-prettier": "8.3.0",
+    "eslint-config-standard-with-typescript": "20.0.0",
+    "eslint-plugin-import": "2.23.4",
+    "eslint-plugin-jsdoc": "35.1.0",
     "eslint-plugin-no-null": "1.0.2",
     "eslint-plugin-node": "11.1.0",
-    "eslint-plugin-prettier": "3.1.4",
-    "eslint-plugin-promise": "4.2.1",
-    "eslint-plugin-standard": "4.1.0",
-    "husky": "4.3.0",
-    "lint-staged": "10.5.1",
-    "prettier": "2.1.2",
-    "rimraf": "3.0.2",
-    "semantic-release": "17.2.3",
-    "syncpack": "5.6.10",
-    "typescript": "4.1.2"
+    "eslint-plugin-promise": "5.1.0",
+    "fast-glob": "3.2.5",
+    "fs-extra": "9.1.0",
+    "husky": "6.0.0",
+    "is-ci": "3.0.0",
+    "lint-staged": "11.0.0",
+    "mocha": "8.4.0",
+    "prettier": "2.3.0",
+    "prettier-config-escapace": "1.0.0",
+    "semantic-release": "17.4.3",
+    "syncpack": "5.7.11",
+    "typescript": "4.3.2"
   },
   "engines": {
-    "node": ">=10.16.0"
+    "node": ">=14.17.0"
+  },
+  "exports": {
+    "import": "./lib/import/index.js"
   },
   "files": [
     "lib"
   ],
   "homepage": "https://github.com/escapace/fluent",
-  "keywords": [
-    "DSL",
-    "Fluent",
-    "TypeScript"
-  ],
   "license": "MPL-2.0",
-  "main": "lib/cjs/index.js",
-  "module": "lib/esm/index.js",
   "private": false,
   "publishConfig": {
     "access": "public"
   },
-  "repository": "escapace/fluent",
+  "repository": "https://github.com/escapace/fluent.git",
   "scripts": {
-    "build": "npx recce build -e src/index.ts",
-    "lint": "ls-lint && eslint 'src/**/*.ts' 'test/**/*.ts'",
-    "test": "npx recce test -p tsconfig-test.json --browser 'test/**.spec.ts' --node 'test/**.spec.ts' --reporter lcov --reporter text --coverage-exclude 'test/**/*.ts'",
-    "typecheck": "tsc -p tsconfig-test.json --noEmit"
+    "build": "rm -rf lib && mkdir -p lib/import lib/types && npm run build:import && npm run build:types",
+    "build:import": "esbuild src/index.ts --bundle --minify --sourcemap --format=esm --outfile=./lib/import/index.js",
+    "build:types": "tsc -p ./tsconfig-declaration.json --emitDeclarationOnly --declarationDir lib/types",
+    "lint": "ls-lint && eslint --fix 'src/**/*.ts?(x)'",
+    "prepare": "is-ci || husky install",
+    "test": "node ./scripts/test.js && c8 mocha --enable-source-maps 'lib/test/**/*.spec.js'",
+    "typecheck": "tsc --noEmit"
   },
   "sideEffects": false,
-  "typings": "lib/types/index.d.ts"
+  "type": "module",
+  "types": "lib/types/index.d.ts",
+  "dependencies": {
+    "@escapace/typelevel": "^1.0.0",
+    "lodash-es": "^4.17.21"
+  }
 }

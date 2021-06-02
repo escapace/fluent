@@ -181,7 +181,7 @@ const some = <T>(
   let current = 0
 
   while (current < collection.length) {
-    if (predicate(collection[current])) {
+    if (predicate(collection[current] as T)) {
       return true
     }
 
@@ -347,8 +347,8 @@ const dispatchFactory = <T extends Settings>(_state: LocalState<T>) => {
   return (action?: Action, ...plugins: Array<Plugin<Types<T>, T>>) => {
     const state =
       plugins.length !== 0
-        ? register(normalizeRecords(plugins), Object.assign({}, _state))
-        : Object.assign({}, _state)
+        ? register(normalizeRecords(plugins), { ..._state})
+        : ({ ..._state})
 
     if (!isUndefined(action)) {
       if (isPlainObject(action) && isType(action.type)) {
