@@ -4,12 +4,16 @@
   "version": "0.0.0",
   "author": "escapace <opensource@escapace.com>",
   "bugs": "https://github.com/escapace/fluent/issues",
+  "dependencies": {
+    "@escapace/typelevel": "^1.1.0",
+    "lodash-es": "^4.17.21"
+  },
   "devDependencies": {
     "@commitlint/cli": "12.1.4",
     "@commitlint/config-conventional": "12.1.4",
     "@ls-lint/ls-lint": "1.9.2",
     "@types/chai": "4.2.18",
-    "@types/lodash-es": "^4.17.4",
+    "@types/lodash-es": "4.17.4",
     "@types/mocha": "8.2.2",
     "@types/node": "15.6.1",
     "@typescript-eslint/eslint-plugin": "4.25.0",
@@ -66,9 +70,5 @@
   },
   "sideEffects": false,
   "type": "module",
-  "types": "lib/types/index.d.ts",
-  "dependencies": {
-    "@escapace/typelevel": "^1.0.0",
-    "lodash-es": "^4.17.21"
-  }
+  "types": "lib/types/index.d.ts"
 }
