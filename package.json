@@ -61,7 +61,7 @@
   "repository": "https://github.com/escapace/fluent.git",
   "scripts": {
     "build": "rm -rf lib && mkdir -p lib/import lib/types && npm run build:import && npm run build:types",
-    "build:import": "esbuild src/index.ts --bundle --minify --sourcemap --format=esm --outfile=./lib/import/index.js",
+    "build:import": "esbuild src/index.ts --bundle --minify --sourcemap --format=esm --external:lodash-es --outfile=./lib/import/index.js",
     "build:types": "tsc -p ./tsconfig-declaration.json --emitDeclarationOnly --declarationDir lib/types",
     "lint": "ls-lint && eslint --fix 'src/**/*.ts?(x)'",
     "prepare": "is-ci || husky install",
