@@ -16,7 +16,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install libgbm-dev
       - name: Checkout
-        uses: actions/checkout@v3.1.0
+        uses: actions/checkout@v3.3.0
       - name: Setup Node.js
         uses: actions/setup-node@v3.6.0
         with:
