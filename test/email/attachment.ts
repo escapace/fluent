@@ -4,7 +4,7 @@ import $ from '@escapace/typelevel'
 
 import { Model, Next, Options, Plugin } from '../../src'
 
-import { includes } from 'lodash'
+import { includes } from 'lodash-es'
 
 export const SYMBOL_ATTACHMENT = Symbol.for('Attachment')
 

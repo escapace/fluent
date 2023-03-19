@@ -1,1 +1,1 @@
-# @escapace/fluent
+# typescript-library-starter

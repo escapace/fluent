@@ -1,6 +1,6 @@
 import $ from '@escapace/typelevel'
 import { assert } from 'chai'
-import { noop } from 'lodash'
+import { noop } from 'lodash-es'
 import { builder, log, Options, SYMBOL_LOG, SYMBOL_STATE, state } from '../src'
 import { email } from './email'
 import { ActionTo, InitialState, Settings, SYMBOL_TO } from './email/types'
