@@ -1,14 +1,12 @@
 import $ from '@escapace/typelevel'
 
 import {
-  isArray,
   isBoolean,
   isFunction,
   isNumber,
   isPlainObject,
   isString,
-  isSymbol,
-  isUndefined
+  isSymbol
 } from 'lodash-es'
 
 export interface Action<T extends string | number | symbol = any, U = any> {
@@ -181,7 +179,7 @@ const some = <T>(
   let current = 0
 
   while (current < collection.length) {
-    if (predicate(collection[current] as T)) {
+    if (predicate(collection[current])) {
       return true
     }
 
@@ -233,7 +231,7 @@ const normalizeRecords = <T extends Settings>(
     if (
       !(
         isFunction(record[Options.Dependencies]) ||
-        (isArray(record[Options.Dependencies]) &&
+        (Array.isArray(record[Options.Dependencies]) &&
           every(
             record[Options.Dependencies] as Array<number | string | symbol>,
             isType
@@ -347,10 +345,10 @@ const dispatchFactory = <T extends Settings>(_state: LocalState<T>) => {
   return (action?: Action, ...plugins: Array<Plugin<Types<T>, T>>) => {
     const state =
       plugins.length !== 0
-        ? register(normalizeRecords(plugins), { ..._state})
-        : ({ ..._state})
+        ? register(normalizeRecords(plugins), { ..._state })
+        : { ..._state }
 
-    if (!isUndefined(action)) {
+    if (action !== undefined) {
       if (isPlainObject(action) && isType(action.type)) {
         state.log = [action, ...state.log]
       } else {
@@ -402,8 +400,8 @@ export const builder = <T extends Settings>(
   const normalized = normalizeRecords(value)
 
   return () => {
-    return (dispatchFactory(
+    return dispatchFactory(
       register(normalized, initialLocalStateFactory())
-    )() as unknown) as Next<T>
+    )() as unknown as Next<T>
   }
 }

@@ -45,13 +45,13 @@ export interface State {
 }
 
 export interface Email<T extends Model<State>> extends FluentInterface<T> {
-  to<U extends string>(payload: U): Next<Settings, T, ActionTo<U>>
+  to: <U extends string>(payload: U) => Next<Settings, T, ActionTo<U>>
 
-  subject<U extends string>(payload: U): Next<Settings, T, ActionSubject<U>>
+  subject: <U extends string>(payload: U) => Next<Settings, T, ActionSubject<U>>
 
-  send(): Next<Settings, T, ActionSend>
+  send: () => Next<Settings, T, ActionSend>
 
-  body<U extends string>(payload: U): Next<Settings, T, ActionBody<U>>
+  body: <U extends string>(payload: U) => Next<Settings, T, ActionBody<U>>
 }
 
 export interface Category<T extends Model<State>> {

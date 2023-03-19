@@ -13,7 +13,7 @@ import {
 
 import { ActionPlugin, SYMBOL_PLUGIN } from './plugin'
 
-import { filter, find, flatten, get, isString, map } from 'lodash'
+import { filter, find, flatten, get, isString, map } from 'lodash-es'
 
 export { attachment } from './attachment'
 export { cc } from './cc'

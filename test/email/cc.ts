@@ -4,7 +4,7 @@ import $ from '@escapace/typelevel'
 
 import { Action, Model, Next, Options, Payload, Plugin } from '../../src'
 
-import { filter, includes, map } from 'lodash'
+import { filter, includes, map } from 'lodash-es'
 
 export const SYMBOL_CC = Symbol.for('CC')
 
