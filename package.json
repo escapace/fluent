@@ -43,7 +43,7 @@
   },
   "engines": {
     "node": ">= 18.2.0",
-    "pnpm": ">= 7.14.0"
+    "pnpm": ">= 8.1.1"
   },
   "exports": {
     ".": {
@@ -59,9 +59,6 @@
   "license": "MPL-2.0",
   "module": "lib/esm/index.mjs",
   "private": false,
-  "publishConfig": {
-    "access": "public"
-  },
   "repository": "https://github.com/escapace/fluent.git",
   "scripts": {
     "build": "node ./scripts/build.mjs",
