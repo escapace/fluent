@@ -6,7 +6,7 @@ import path from 'path'
 import { cwd, target, external } from './constants.mjs'
 
 const directoryTests = path.join(cwd, 'lib/tests')
-const directorySrc = path.join(cwd, 'test')
+const directorySrc = cwd
 
 process.umask(0o022)
 process.chdir(cwd)
@@ -14,7 +14,7 @@ process.chdir(cwd)
 await remove(directoryTests)
 await mkdir(directoryTests, { recursive: true })
 
-const entryPoints = await fastGlob(['**/*.spec.?(m)(j|t)s?(x)'], {
+const entryPoints = await fastGlob(['src/**/*.spec.?(m)(j|t)s?(x)', 'test/**/*.spec.?(m)(j|t)s?(x)'], {
   absolute: true,
   cwd: directorySrc,
   dot: true
