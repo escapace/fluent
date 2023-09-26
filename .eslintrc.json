@@ -1,17 +1,17 @@
 {
+  "extends": ["escapace"],
   "parserOptions": {
-    "warnOnUnsupportedTypeScriptVersion": false,
-    "project": "./tsconfig.json"
+    "project": "./tsconfig.json",
+    "warnOnUnsupportedTypeScriptVersion": false
   },
   "root": true,
-  "extends": ["escapace"],
   "rules": {
-    "@typescript-eslint/no-explicit-any": 0,
-    "@typescript-eslint/no-unsafe-assignment": 0,
-    "@typescript-eslint/no-unsafe-argument": 0,
-    "@typescript-eslint/no-unsafe-member-access": 0,
-    "@typescript-eslint/no-unsafe-return": 0,
+    "@typescript-eslint/ban-types": 0,
     "@typescript-eslint/method-signature-style": 0,
-    "@typescript-eslint/ban-types": 0
+    "@typescript-eslint/no-explicit-any": 0,
+    "@typescript-eslint/no-unsafe-argument": 0,
+    "@typescript-eslint/no-unsafe-assignment": 0,
+    "@typescript-eslint/no-unsafe-member-access": 0,
+    "@typescript-eslint/no-unsafe-return": 0
   }
 }
