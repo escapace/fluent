@@ -1,5 +1,5 @@
-import $ from '@escapace/typelevel'
-import {
+import type $ from '@escapace/typelevel'
+import type {
   Action,
   FluentInterface,
   Model,
@@ -18,106 +18,106 @@ export const SYMBOL_BODY = Symbol.for('Body')
 export const SYMBOL_SEND = Symbol.for('Send')
 
 export interface ActionTo<T extends string> {
-  type: typeof SYMBOL_TO
   payload: T
+  type: typeof SYMBOL_TO
 }
 
 export interface ActionSubject<T extends string> {
-  type: typeof SYMBOL_SUBJECT
   payload: T
+  type: typeof SYMBOL_SUBJECT
 }
 
 export interface ActionBody<T extends string> {
-  type: typeof SYMBOL_BODY
   payload: T
+  type: typeof SYMBOL_BODY
 }
 
 export interface ActionSend {
-  type: typeof SYMBOL_SEND
   payload: true
+  type: typeof SYMBOL_SEND
 }
 
 export interface State {
-  to?: string
-  subject?: string
   body?: string
   sent: boolean
+  subject?: string
+  to?: string
 }
 
 export interface Email<T extends Model<State>> extends FluentInterface<T> {
-  to: <U extends string>(payload: U) => Next<Settings, T, ActionTo<U>>
-
-  subject: <U extends string>(payload: U) => Next<Settings, T, ActionSubject<U>>
+  body: <U extends string>(payload: U) => Next<Settings, T, ActionBody<U>>
 
   send: () => Next<Settings, T, ActionSend>
 
-  body: <U extends string>(payload: U) => Next<Settings, T, ActionBody<U>>
+  subject: <U extends string>(payload: U) => Next<Settings, T, ActionSubject<U>>
+
+  to: <U extends string>(payload: U) => Next<Settings, T, ActionTo<U>>
 }
 
 export interface Category<T extends Model<State>> {
-  [SYMBOL_TO]: {
-    [Options.Type]: typeof SYMBOL_TO
-    [Options.Once]: $.True
-    [Options.Dependencies]: never
-    [Options.Keys]: 'to'
-    [Options.Enabled]: $.True
-    [Options.Conflicts]: never
-  }
-
-  [SYMBOL_SUBJECT]: {
-    [Options.Type]: typeof SYMBOL_SUBJECT
-    [Options.Once]: $.True
-    [Options.Dependencies]: typeof SYMBOL_TO
-    [Options.Keys]: 'subject'
-    [Options.Enabled]: $.True
-    [Options.Conflicts]: never
-  }
-
   [SYMBOL_BODY]: {
-    [Options.Type]: typeof SYMBOL_BODY
-    [Options.Once]: $.True
-    [Options.Dependencies]: typeof SYMBOL_TO | typeof SYMBOL_SUBJECT
-    [Options.Keys]: 'body'
-    [Options.Enabled]: $.True
     [Options.Conflicts]: never
+    [Options.Dependencies]: typeof SYMBOL_SUBJECT | typeof SYMBOL_TO
+    [Options.Enabled]: $.True
+    [Options.Keys]: 'body'
+    [Options.Once]: $.True
+    [Options.Type]: typeof SYMBOL_BODY
   }
 
   [SYMBOL_SEND]: {
-    [Options.Type]: typeof SYMBOL_SEND
-    [Options.Once]: $.True
-    [Options.Dependencies]: never
-    [Options.Keys]: 'send'
-    [Options.Enabled]: $.Equal<$.Widen<T['state']['body']>, string>
     [Options.Conflicts]: never
+    [Options.Dependencies]: never
+    [Options.Enabled]: $.Equal<$.Widen<T['state']['body']>, string>
+    [Options.Keys]: 'send'
+    [Options.Once]: $.True
+    [Options.Type]: typeof SYMBOL_SEND
+  }
+
+  [SYMBOL_SUBJECT]: {
+    [Options.Conflicts]: never
+    [Options.Dependencies]: typeof SYMBOL_TO
+    [Options.Enabled]: $.True
+    [Options.Keys]: 'subject'
+    [Options.Once]: $.True
+    [Options.Type]: typeof SYMBOL_SUBJECT
+  }
+
+  [SYMBOL_TO]: {
+    [Options.Conflicts]: never
+    [Options.Dependencies]: never
+    [Options.Enabled]: $.True
+    [Options.Keys]: 'to'
+    [Options.Once]: $.True
+    [Options.Type]: typeof SYMBOL_TO
   }
 }
 
 export interface Reducer<T extends Action[]> {
-  [SYMBOL_TO]: { to: Payload<$.Values<T>, typeof SYMBOL_TO> }
-  [SYMBOL_SUBJECT]: { subject: Payload<$.Values<T>, typeof SYMBOL_SUBJECT> }
   [SYMBOL_BODY]: { body: Payload<$.Values<T>, typeof SYMBOL_BODY> }
   [SYMBOL_SEND]: { sent: Payload<$.Values<T>, typeof SYMBOL_SEND> }
+  [SYMBOL_SUBJECT]: { subject: Payload<$.Values<T>, typeof SYMBOL_SUBJECT> }
+  [SYMBOL_TO]: { to: Payload<$.Values<T>, typeof SYMBOL_TO> }
 }
 
 export interface InitialState {
-  sent: false
-  to: undefined
-  subject: undefined
   body: undefined
+  sent: false
+  subject: undefined
+  to: undefined
 }
 
 export interface Settings {
-  [Options.Interface]: typeof EMAIL_INTERFACE
-  [Options.Specification]: typeof EMAIL_SPECIFICATION
-  [Options.Reducer]: typeof EMAIL_REDUCER
   [Options.InitialState]: InitialState
+  [Options.Interface]: typeof EMAIL_INTERFACE
+  [Options.Reducer]: typeof EMAIL_REDUCER
+  [Options.Specification]: typeof EMAIL_SPECIFICATION
   [Options.State]: State
 }
 
 declare module '@escapace/typelevel/hkt' {
   interface URI2HKT<A> {
     [EMAIL_INTERFACE]: Email<$.Cast<A, Model<State>>>
-    [EMAIL_SPECIFICATION]: Category<$.Cast<A, Model<State>>>
     [EMAIL_REDUCER]: Reducer<$.Cast<A, Action[]>>
+    [EMAIL_SPECIFICATION]: Category<$.Cast<A, Model<State>>>
   }
 }

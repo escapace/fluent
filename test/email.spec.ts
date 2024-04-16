@@ -1,21 +1,21 @@
 import { attachment, cc, email } from './email'
 import {
-  ActionBody,
-  ActionSend,
-  ActionSubject,
-  ActionTo,
-  InitialState,
+  type ActionBody,
+  type ActionSend,
+  type ActionSubject,
+  type ActionTo,
+  type InitialState,
   SYMBOL_BODY,
   SYMBOL_SEND,
   SYMBOL_SUBJECT,
   SYMBOL_TO
 } from './email/types'
 
-import { ActionCC, SYMBOL_CC } from './email/cc'
-import { ActionAttachment, SYMBOL_ATTACHMENT } from './email/attachment'
-import { ActionPlugin, SYMBOL_PLUGIN } from './email/plugin'
+import { type ActionCC, SYMBOL_CC } from './email/cc'
+import { type ActionAttachment, SYMBOL_ATTACHMENT } from './email/attachment'
+import { type ActionPlugin, SYMBOL_PLUGIN } from './email/plugin'
 
-import $ from '@escapace/typelevel'
+import type $ from '@escapace/typelevel'
 
 import { SYMBOL_LOG, SYMBOL_STATE, log, state } from '../src'
 
@@ -61,8 +61,8 @@ describe('email', () => {
     assert.isFunction(test.subject)
     assert.lengthOf(_log, 1)
     assert.deepInclude(_log, {
-      type: SYMBOL_TO,
-      payload: 'john.doe@example.com'
+      payload: 'john.doe@example.com',
+      type: SYMBOL_TO
     })
     assert.deepEqual(_state, {
       body: undefined,
@@ -83,7 +83,7 @@ describe('email', () => {
 
     const _state: $.Assign<
       InitialState,
-      { to: 'john.doe@example.com'; subject: 'Hello World' }
+      { subject: 'Hello World'; to: 'john.doe@example.com' }
     > = state(test)
 
     assert.isObject(test)
@@ -91,8 +91,8 @@ describe('email', () => {
     assert.isFunction(test.body)
     assert.lengthOf(_log, 2)
     assert.deepInclude(_log, {
-      type: SYMBOL_SUBJECT,
-      payload: 'Hello World'
+      payload: 'Hello World',
+      type: SYMBOL_SUBJECT
     })
     assert.deepEqual(_state, {
       body: undefined,
@@ -118,9 +118,9 @@ describe('email', () => {
     const _state: $.Assign<
       InitialState,
       {
-        to: 'john.doe@example.com'
-        subject: 'Hello World'
         body: 'Totam est perferendis provident consequatur et harum autem.'
+        subject: 'Hello World'
+        to: 'john.doe@example.com'
       }
     > = state(test)
 
@@ -129,8 +129,8 @@ describe('email', () => {
     assert.isFunction(test.send)
     assert.lengthOf(_log, 3)
     assert.deepInclude(_log, {
-      type: SYMBOL_BODY,
-      payload: 'Totam est perferendis provident consequatur et harum autem.'
+      payload: 'Totam est perferendis provident consequatur et harum autem.',
+      type: SYMBOL_BODY
     })
     assert.deepEqual(_state, {
       body: 'Totam est perferendis provident consequatur et harum autem.',
@@ -157,10 +157,10 @@ describe('email', () => {
     const _state: $.Assign<
       InitialState,
       {
-        to: 'john.doe@example.com'
-        subject: 'Hello World'
         body: 'Totam est perferendis provident consequatur et harum autem.'
         sent: true
+        subject: 'Hello World'
+        to: 'john.doe@example.com'
       }
     > = state(test)
 
@@ -168,8 +168,8 @@ describe('email', () => {
     assert.hasAllKeys(test, [SYMBOL_LOG, SYMBOL_STATE])
     assert.lengthOf(_log, 4)
     assert.deepInclude(_log, {
-      type: SYMBOL_SEND,
-      payload: true
+      payload: true,
+      type: SYMBOL_SEND
     })
     assert.deepEqual(_state, {
       body: 'Totam est perferendis provident consequatur et harum autem.',
@@ -196,10 +196,10 @@ describe('email', () => {
     const _state: $.Assign<
       InitialState,
       {
-        to: 'john.doe@example.com'
-        subject: 'Hello World'
         body: 'Totam est perferendis provident consequatur et harum autem.'
         sent: true
+        subject: 'Hello World'
+        to: 'john.doe@example.com'
       }
     > = state(test)
 
@@ -207,8 +207,8 @@ describe('email', () => {
     assert.hasAllKeys(test, [SYMBOL_LOG, SYMBOL_STATE])
     assert.lengthOf(_log, 4)
     assert.deepInclude(_log, {
-      type: SYMBOL_SEND,
-      payload: true
+      payload: true,
+      type: SYMBOL_SEND
     })
     assert.deepEqual(_state, {
       body: 'Totam est perferendis provident consequatur et harum autem.',
@@ -227,7 +227,7 @@ describe('email', () => {
       .plugin(cc, attachment)
 
     const _log: [
-      ActionPlugin<Array<typeof SYMBOL_CC | typeof SYMBOL_ATTACHMENT>>,
+      ActionPlugin<Array<typeof SYMBOL_ATTACHMENT | typeof SYMBOL_CC>>,
       ActionBody<'Totam est perferendis provident consequatur et harum autem.'>,
       ActionSubject<'Hello World'>,
       ActionTo<'john.doe@example.com'>
@@ -236,11 +236,11 @@ describe('email', () => {
     const _state: $.Assign<
       InitialState,
       {
-        to: 'john.doe@example.com'
-        subject: 'Hello World'
         body: 'Totam est perferendis provident consequatur et harum autem.'
-        plugins: Array<typeof SYMBOL_CC | typeof SYMBOL_ATTACHMENT>
         cc?: []
+        plugins: Array<typeof SYMBOL_ATTACHMENT | typeof SYMBOL_CC>
+        subject: 'Hello World'
+        to: 'john.doe@example.com'
       }
     > = state(test)
 
@@ -258,12 +258,12 @@ describe('email', () => {
     assert.isFunction(test.cc)
     assert.lengthOf(_log, 4)
     assert.deepInclude(_log, {
-      type: SYMBOL_PLUGIN,
-      payload: [SYMBOL_CC, SYMBOL_ATTACHMENT]
+      payload: [SYMBOL_CC, SYMBOL_ATTACHMENT],
+      type: SYMBOL_PLUGIN
     })
     assert.deepEqual(_state, {
-      cc: [],
       body: 'Totam est perferendis provident consequatur et harum autem.',
+      cc: [],
       plugins: [SYMBOL_CC, SYMBOL_ATTACHMENT],
       sent: false,
       subject: 'Hello World',
@@ -281,24 +281,24 @@ describe('email', () => {
       .cc('justin.doe@example.com')
 
     const _log: Array<
-      | ActionTo<'john.doe@example.com'>
-      | ActionSubject<'Hello World'>
       | ActionBody<
           'Totam est perferendis provident consequatur et harum autem.'
         >
-      | ActionPlugin<Array<typeof SYMBOL_CC | typeof SYMBOL_ATTACHMENT>>
       | ActionCC<'jane.doe@example.com'>
       | ActionCC<'justin.doe@example.com'>
+      | ActionPlugin<Array<typeof SYMBOL_ATTACHMENT | typeof SYMBOL_CC>>
+      | ActionSubject<'Hello World'>
+      | ActionTo<'john.doe@example.com'>
     > = log(test)
 
     const _state: $.Assign<
       InitialState,
       {
-        to: 'john.doe@example.com'
-        subject: 'Hello World'
         body: 'Totam est perferendis provident consequatur et harum autem.'
-        plugins: Array<typeof SYMBOL_CC | typeof SYMBOL_ATTACHMENT>
         cc?: Array<'jane.doe@example.com' | 'justin.doe@example.com'>
+        plugins: Array<typeof SYMBOL_ATTACHMENT | typeof SYMBOL_CC>
+        subject: 'Hello World'
+        to: 'john.doe@example.com'
       }
     > = state(test)
 
@@ -317,22 +317,22 @@ describe('email', () => {
     assert.lengthOf(_log, 6)
 
     assert.deepInclude(_log, {
-      type: SYMBOL_CC,
-      payload: 'jane.doe@example.com'
+      payload: 'jane.doe@example.com',
+      type: SYMBOL_CC
     })
 
     assert.deepInclude(_log, {
-      type: SYMBOL_CC,
-      payload: 'justin.doe@example.com'
+      payload: 'justin.doe@example.com',
+      type: SYMBOL_CC
     })
 
     assert.deepEqual(_state, {
       body: 'Totam est perferendis provident consequatur et harum autem.',
+      cc: ['justin.doe@example.com', 'jane.doe@example.com'],
       plugins: [SYMBOL_CC, SYMBOL_ATTACHMENT],
       sent: false,
       subject: 'Hello World',
-      to: 'john.doe@example.com',
-      cc: ['justin.doe@example.com', 'jane.doe@example.com']
+      to: 'john.doe@example.com'
     })
   })
 
@@ -349,23 +349,23 @@ describe('email', () => {
       .attachment(attachment2)
 
     const _log: Array<
-      | ActionTo<'john.doe@example.com'>
-      | ActionSubject<'Hello World'>
+      | ActionAttachment
       | ActionBody<
           'Totam est perferendis provident consequatur et harum autem.'
         >
-      | ActionPlugin<Array<typeof SYMBOL_CC | typeof SYMBOL_ATTACHMENT>>
-      | ActionAttachment
+      | ActionPlugin<Array<typeof SYMBOL_ATTACHMENT | typeof SYMBOL_CC>>
+      | ActionSubject<'Hello World'>
+      | ActionTo<'john.doe@example.com'>
     > = log(test)
 
     const _state: $.Assign<
       InitialState,
       {
-        to: 'john.doe@example.com'
-        subject: 'Hello World'
         body: 'Totam est perferendis provident consequatur et harum autem.'
-        plugins: Array<typeof SYMBOL_CC | typeof SYMBOL_ATTACHMENT>
         cc?: []
+        plugins: Array<typeof SYMBOL_ATTACHMENT | typeof SYMBOL_CC>
+        subject: 'Hello World'
+        to: 'john.doe@example.com'
       }
     > = state(test)
 
@@ -385,18 +385,18 @@ describe('email', () => {
     assert.lengthOf(_log, 6)
 
     assert.deepInclude(_log, {
-      type: SYMBOL_ATTACHMENT,
-      payload: attachment1
+      payload: attachment1,
+      type: SYMBOL_ATTACHMENT
     })
 
     assert.deepInclude(_log, {
-      type: SYMBOL_ATTACHMENT,
-      payload: attachment2
+      payload: attachment2,
+      type: SYMBOL_ATTACHMENT
     })
 
     assert.deepEqual(_state, {
-      cc: [],
       body: 'Totam est perferendis provident consequatur et harum autem.',
+      cc: [],
       plugins: [SYMBOL_CC, SYMBOL_ATTACHMENT],
       sent: false,
       subject: 'Hello World',
