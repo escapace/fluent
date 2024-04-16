@@ -1,14 +1,14 @@
-import $ from '@escapace/typelevel'
+import type $ from '@escapace/typelevel'
 
-import { Action, Model, Next, Options, Payload, Plugin, Types } from '../../src'
+import type { Action, Model, Next, Options, Payload, Plugin, Types } from '../../src'
 
-import { Settings } from './types'
+import type { Settings } from './types'
 
 export const SYMBOL_PLUGIN = Symbol.for('Plugin')
 
 export interface ActionPlugin<T extends Array<Types<Settings>>> {
-  type: typeof SYMBOL_PLUGIN
   payload: T
+  type: typeof SYMBOL_PLUGIN
 }
 
 declare module './types' {
@@ -21,11 +21,6 @@ declare module './types' {
   }
 
   export interface Email<T> {
-    plugin<A extends Types<Settings>, B extends Types<Settings>>(
-      A: Plugin<A, Settings>,
-      B: Plugin<B, Settings>
-    ): Next<Settings, T, ActionPlugin<Array<A | B>>>
-
     plugin<
       A extends Types<Settings>,
       B extends Types<Settings>,
@@ -48,6 +43,11 @@ declare module './types' {
       D: Plugin<D, Settings>
     ): Next<Settings, T, ActionPlugin<Array<A | B | C | D>>>
 
+    plugin<A extends Types<Settings>, B extends Types<Settings>>(
+      A: Plugin<A, Settings>,
+      B: Plugin<B, Settings>
+    ): Next<Settings, T, ActionPlugin<Array<A | B>>>
+
     plugin<U extends Types<Settings>>(
       ...payload: Array<Plugin<U, Settings>>
     ): Next<Settings, T, ActionPlugin<U[]>>
@@ -62,12 +62,12 @@ declare module './types' {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   export interface Category<T extends Model<State>> {
     [SYMBOL_PLUGIN]: {
-      [Options.Type]: typeof SYMBOL_PLUGIN
-      [Options.Once]: $.False
-      [Options.Dependencies]: never
-      [Options.Keys]: 'plugin'
-      [Options.Enabled]: $.True
       [Options.Conflicts]: typeof SYMBOL_SEND
+      [Options.Dependencies]: never
+      [Options.Enabled]: $.True
+      [Options.Keys]: 'plugin'
+      [Options.Once]: $.False
+      [Options.Type]: typeof SYMBOL_PLUGIN
     }
   }
 }

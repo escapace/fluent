@@ -1,4 +1,4 @@
-import $ from '@escapace/typelevel'
+import type $ from '@escapace/typelevel'
 
 import {
   isBoolean,
@@ -9,9 +9,9 @@ import {
   isSymbol
 } from 'lodash-es'
 
-export interface Action<T extends string | number | symbol = any, U = any> {
-  type: T
+export interface Action<T extends number | string | symbol = any, U = any> {
   payload: U
+  type: T
 }
 
 export interface Model<U extends {} = any, T extends Action[] = any> {
@@ -34,32 +34,26 @@ export enum Options {
 }
 
 export interface Settings {
-  [Options.Interface]: $.URIS
-  [Options.Specification]: $.URIS
-  [Options.Reducer]: $.URIS
   [Options.InitialState]: {}
+  [Options.Interface]: $.URIS
+  [Options.Reducer]: $.URIS
+  [Options.Specification]: $.URIS
   [Options.State]: {}
 }
 
 export interface Specification {
-  [Options.Type]: Action['type']
-  [Options.Once]: $.True | $.False
-  [Options.Dependencies]: Action['type']
-  [Options.Keys]: string
-  [Options.Enabled]: $.True | $.False
   [Options.Conflicts]: Action['type']
+  [Options.Dependencies]: Action['type']
+  [Options.Enabled]: $.False | $.True
+  [Options.Keys]: string
+  [Options.Once]: $.False | $.True
+  [Options.Type]: Action['type']
 }
 
 export type Check<T extends Model, S> = S extends Specification
   ? T['log'] extends Array<{ type: infer X }>
     ? $.If<
         $.Equal<
-          | S[Options.Enabled]
-          | $.If<
-              $.Or<$.Not<S[Options.Once]>, $.Is.Unknown<X>>,
-              $.True,
-              $.Not<$.Contains<X, S[Options.Type]>>
-            >
           | $.If<
               $.Is.Never<S[Options.Dependencies]>,
               $.True,
@@ -73,7 +67,13 @@ export type Check<T extends Model, S> = S extends Specification
               $.Or<$.Is.Never<S[Options.Conflicts]>, $.Is.Unknown<X>>,
               $.True,
               $.Not<$.Has<X, S[Options.Conflicts]>>
-            >,
+            >
+          | $.If<
+              $.Or<$.Not<S[Options.Once]>, $.Is.Unknown<X>>,
+              $.True,
+              $.Not<$.Contains<X, S[Options.Type]>>
+            >
+          | S[Options.Enabled],
           $.True
         >,
         never,
@@ -82,7 +82,7 @@ export type Check<T extends Model, S> = S extends Specification
     : never
   : never
 
-export type Fluent<T, K extends string | number | symbol> = {
+export type Fluent<T, K extends number | string | symbol> = {
   [P in Exclude<keyof T, K>]: T[P]
 }
 
@@ -115,11 +115,8 @@ export type Next<
   Log<S, $.If<$.Is.Never<$.Values<T['log']>>, [U], [U, ...T['log']]>>
 >
 
-export type Payload<
-  T extends Action,
-  U extends T['type'],
-  E = never
-> = T extends Action<U, infer P> ? P : E
+export type Payload<T extends Action, U extends T['type'], E = never> =
+  T extends Action<U, infer P> ? P : E
 
 export type Types<T extends Settings> = keyof $.Type<
   T[Options.Specification],
@@ -129,10 +126,17 @@ export type Types<T extends Settings> = keyof $.Type<
 export interface Plugin<
   Z extends Types<T>,
   T extends Settings,
-  U extends string | number | symbol = Types<T>
+  U extends number | string | symbol = Types<T>
 > {
-  [Options.Type]: Z
-  [Options.Once]: boolean
+  [Options.Conflicts]?: U[]
+  [Options.Dependencies]?:
+    | ((log: Array<Action<U>>, state: T[Options.State]) => U[])
+    | U[]
+  [Options.Enabled]?: (
+    log: Array<Action<U>>,
+    state: T[Options.State]
+  ) => boolean
+  [Options.InitialState]?: Partial<T[Options.State]>
   [Options.Interface]: (
     dispatch: <A extends Action<U>, B extends Types<T> = Types<T>>(
       action: A,
@@ -141,17 +145,10 @@ export interface Plugin<
     log: Array<Action<U>>,
     state: T[Options.State]
   ) => {}
-  [Options.Keys]?: Array<string | number | symbol>
-  [Options.Dependencies]?:
-    | U[]
-    | ((log: Array<Action<U>>, state: T[Options.State]) => U[])
-  [Options.Enabled]?: (
-    log: Array<Action<U>>,
-    state: T[Options.State]
-  ) => boolean
-  [Options.Conflicts]?: U[]
-  [Options.InitialState]?: Partial<T[Options.State]>
+  [Options.Keys]?: Array<number | string | symbol>
+  [Options.Once]: boolean
   [Options.Reducer]?: (log: Array<Action<U>>) => Partial<T[Options.State]>
+  [Options.Type]: Z
 }
 
 export const SYMBOL_LOG = Symbol.for('ESCAPACE_FLUENT_LOG')
@@ -193,21 +190,21 @@ const normalize = <T extends Settings>(
   records: Array<Plugin<Types<T>, T>>
 ): Array<Required<Plugin<Types<T>, T>>> =>
   records.map((record) => ({
-    [Options.Keys]: [],
+    [Options.Conflicts]: [],
     [Options.Dependencies]: [],
     [Options.Enabled]: () => true,
-    [Options.Conflicts]: [],
     [Options.InitialState]: {},
+    [Options.Keys]: [],
     [Options.Reducer]: () => ({}),
     ...record
   }))
 
 interface LocalState<T extends Settings> {
+  initialState: {}
+  log: Action[]
   records: Array<Required<Plugin<Types<T>, T>>>
   reducers: Array<Required<Plugin<Types<T>, T>>[Options.Reducer]>
-  initialState: {}
   state: {}
-  log: Action[]
 }
 
 const normalizeRecords = <T extends Settings>(
@@ -307,16 +304,16 @@ const interfaces = <T extends Settings>(state: LocalState<T>): {} => {
   const disabled = state.records.filter(
     (record) =>
       !tests(state, record).reduce<boolean>(
-        (prev, curr) => (prev ? curr() : false),
+        (previous, current) => (previous ? current() : false),
         true
       )
   )
 
   const enabled = state.records.filter((record) => !disabled.includes(record))
 
-  const keys: Array<string | number | symbol> = disabled.reduce(
-    (prev: Array<string | number | symbol>, record) => {
-      return prev.concat(record[Options.Keys])
+  const keys: Array<number | string | symbol> = disabled.reduce(
+    (previous: Array<number | string | symbol>, record) => {
+      return previous.concat(record[Options.Keys])
     },
     []
   )
@@ -387,11 +384,11 @@ const register = <T extends Settings>(
 }
 
 const initialLocalStateFactory = <T extends Settings>(): LocalState<T> => ({
+  initialState: {},
+  log: [],
   records: [],
   reducers: [],
-  initialState: {},
-  state: {},
-  log: []
+  state: {}
 })
 
 export const builder = <T extends Settings>(

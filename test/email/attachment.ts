@@ -1,16 +1,16 @@
-import { SYMBOL_SUBJECT, Settings } from './types'
+import { SYMBOL_SUBJECT, type Settings } from './types'
 
-import $ from '@escapace/typelevel'
+import type $ from '@escapace/typelevel'
 
-import { Model, Next, Options, Plugin } from '../../src'
+import { type Model, type Next, Options, type Plugin } from '../../src'
 
 import { includes } from 'lodash-es'
 
 export const SYMBOL_ATTACHMENT = Symbol.for('Attachment')
 
 export interface ActionAttachment {
-  type: typeof SYMBOL_ATTACHMENT
   payload: Buffer
+  type: typeof SYMBOL_ATTACHMENT
 }
 
 declare module './types' {
@@ -20,31 +20,31 @@ declare module './types' {
 
   export interface Category<T extends Model<State>> {
     [SYMBOL_ATTACHMENT]: {
-      [Options.Type]: typeof SYMBOL_ATTACHMENT
-      [Options.Once]: $.False
+      [Options.Conflicts]: typeof SYMBOL_SEND
       [Options.Dependencies]: typeof SYMBOL_SUBJECT
-      [Options.Keys]: 'attachment'
       [Options.Enabled]: $.Contains<
         $.Values<T['state']['plugins']>,
         typeof SYMBOL_ATTACHMENT
       >
-      [Options.Conflicts]: typeof SYMBOL_SEND
+      [Options.Keys]: 'attachment'
+      [Options.Once]: $.False
+      [Options.Type]: typeof SYMBOL_ATTACHMENT
     }
   }
 }
 
 export const attachment: Plugin<typeof SYMBOL_ATTACHMENT, Settings> = {
-  [Options.Type]: SYMBOL_ATTACHMENT,
-  [Options.Once]: false,
-  [Options.Keys]: ['attachment'],
   [Options.Dependencies]: [SYMBOL_SUBJECT],
   [Options.Enabled]: (_, state) => includes(state.plugins, SYMBOL_ATTACHMENT),
   [Options.Interface]: (dispatch) => ({
     attachment(value: Buffer) {
       return dispatch<ActionAttachment>({
-        type: SYMBOL_ATTACHMENT,
-        payload: value
+        payload: value,
+        type: SYMBOL_ATTACHMENT
       })
     }
-  })
+  }),
+  [Options.Keys]: ['attachment'],
+  [Options.Once]: false,
+  [Options.Type]: SYMBOL_ATTACHMENT
 }
