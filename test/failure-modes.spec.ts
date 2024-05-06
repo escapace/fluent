@@ -1,10 +1,15 @@
 /* eslint-disable unicorn/consistent-function-scoping */
 import type $ from '@escapace/typelevel'
-import { assert } from 'chai'
+import { assert, describe, it } from 'vitest'
 import { noop } from 'lodash-es'
 import { builder, log, Options, SYMBOL_LOG, SYMBOL_STATE, state } from '../src'
 import { email } from './email'
-import { type ActionTo, type InitialState, type Settings, SYMBOL_TO } from './email/types'
+import {
+  type ActionTo,
+  type InitialState,
+  type Settings,
+  SYMBOL_TO
+} from './email/types'
 
 describe('failure-modes', () => {
   it('mutation', () => {
@@ -36,8 +41,8 @@ describe('failure-modes', () => {
   })
 
   it('does not throw', () => {
-    const test = () => {
-      return builder<Settings>([
+    const test = () =>
+      builder<Settings>([
         {
           [Options.Interface]: (_) => ({
             noop() {
@@ -50,7 +55,6 @@ describe('failure-modes', () => {
           [Options.Type]: SYMBOL_TO
         }
       ])
-    }
 
     assert.doesNotThrow(test)
   })
@@ -71,7 +75,7 @@ describe('failure-modes', () => {
         }
       ])
 
-    assert.throws(test, /\[Options.Type]/)
+    assert.throws(test, /\[Options.Type\]/)
   })
 
   it('throw / Options.Once', () => {
@@ -90,7 +94,7 @@ describe('failure-modes', () => {
         }
       ])
 
-    assert.throws(test, /\[Options.Once]/)
+    assert.throws(test, /\[Options.Once\]/)
   })
 
   it('throw / Options.Dependencies', () => {
@@ -109,7 +113,7 @@ describe('failure-modes', () => {
         }
       ])
 
-    assert.throws(test, /\[Options.Dependencies]/)
+    assert.throws(test, /\[Options.Dependencies\]/)
   })
 
   it('throw / Options.Conflicts', () => {
@@ -128,7 +132,7 @@ describe('failure-modes', () => {
         }
       ])
 
-    assert.throws(test, /\[Options.Conflicts]/)
+    assert.throws(test, /\[Options.Conflicts\]/)
   })
 
   it('throw / Options.Enabled', () => {
@@ -147,7 +151,7 @@ describe('failure-modes', () => {
         }
       ])
 
-    assert.throws(test, /\[Options.Enabled]/)
+    assert.throws(test, /\[Options.Enabled\]/)
   })
 
   it('throw / Options.Reducer', () => {
@@ -165,7 +169,7 @@ describe('failure-modes', () => {
         }
       ])
 
-    assert.throws(test, /\[Options.Reducer]/)
+    assert.throws(test, /\[Options.Reducer\]/)
   })
 
   it('throw / Options.InitialState', () => {
@@ -183,7 +187,7 @@ describe('failure-modes', () => {
         }
       ])
 
-    assert.throws(test, /\[Options.InitialState]/)
+    assert.throws(test, /\[Options.InitialState\]/)
   })
 
   it('throw / FSA Type', () => {
