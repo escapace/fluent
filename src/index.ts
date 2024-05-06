@@ -1,3 +1,8 @@
+/* eslint-disable typescript/no-unsafe-return */
+/* eslint-disable typescript/no-unsafe-member-access */
+/* eslint-disable typescript/no-unsafe-assignment */
+/* eslint-disable typescript/no-unsafe-argument */
+/* eslint-disable typescript/no-explicit-any */
 import type $ from '@escapace/typelevel'
 
 import {
@@ -128,6 +133,16 @@ export interface Plugin<
   T extends Settings,
   U extends number | string | symbol = Types<T>
 > {
+  [Options.Interface]: (
+    dispatch: <A extends Action<U>, B extends Types<T> = Types<T>>(
+      action: A,
+      ...plugins: Array<Plugin<B, T>>
+    ) => void,
+    log: Array<Action<U>>,
+    state: T[Options.State]
+  ) => {}
+  [Options.Once]: boolean
+  [Options.Type]: Z
   [Options.Conflicts]?: U[]
   [Options.Dependencies]?:
     | ((log: Array<Action<U>>, state: T[Options.State]) => U[])
@@ -137,18 +152,8 @@ export interface Plugin<
     state: T[Options.State]
   ) => boolean
   [Options.InitialState]?: Partial<T[Options.State]>
-  [Options.Interface]: (
-    dispatch: <A extends Action<U>, B extends Types<T> = Types<T>>(
-      action: A,
-      ...plugins: Array<Plugin<B, T>>
-    ) => void,
-    log: Array<Action<U>>,
-    state: T[Options.State]
-  ) => {}
   [Options.Keys]?: Array<number | string | symbol>
-  [Options.Once]: boolean
   [Options.Reducer]?: (log: Array<Action<U>>) => Partial<T[Options.State]>
-  [Options.Type]: Z
 }
 
 export const SYMBOL_LOG = Symbol.for('ESCAPACE_FLUENT_LOG')
@@ -312,9 +317,8 @@ const interfaces = <T extends Settings>(state: LocalState<T>): {} => {
   const enabled = state.records.filter((record) => !disabled.includes(record))
 
   const keys: Array<number | string | symbol> = disabled.reduce(
-    (previous: Array<number | string | symbol>, record) => {
-      return previous.concat(record[Options.Keys])
-    },
+    (previous: Array<number | string | symbol>, record) =>
+      previous.concat(record[Options.Keys]),
     []
   )
 
@@ -331,15 +335,16 @@ const interfaces = <T extends Settings>(state: LocalState<T>): {} => {
   Object.keys(combinedInterfaces)
     .filter((key) => keys.includes(key))
     .forEach((key) => {
-      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+      // eslint-disable-next-line typescript/no-dynamic-delete
       delete combinedInterfaces[key]
     })
 
   return combinedInterfaces
 }
 
-const dispatchFactory = <T extends Settings>(_state: LocalState<T>) => {
-  return (action?: Action, ...plugins: Array<Plugin<Types<T>, T>>) => {
+const dispatchFactory =
+  <T extends Settings>(_state: LocalState<T>) =>
+  (action?: Action, ...plugins: Array<Plugin<Types<T>, T>>) => {
     const state =
       plugins.length !== 0
         ? register(normalizeRecords(plugins), { ..._state })
@@ -361,7 +366,6 @@ const dispatchFactory = <T extends Settings>(_state: LocalState<T>) => {
 
     return interfaces(state)
   }
-}
 
 const register = <T extends Settings>(
   records: Array<Required<Plugin<Types<T>, T>>>,
@@ -396,9 +400,8 @@ export const builder = <T extends Settings>(
 ): (() => Next<T>) => {
   const normalized = normalizeRecords(value)
 
-  return () => {
-    return dispatchFactory(
+  return () =>
+    dispatchFactory(
       register(normalized, initialLocalStateFactory())
     )() as unknown as Next<T>
-  }
 }

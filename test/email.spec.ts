@@ -19,7 +19,7 @@ import type $ from '@escapace/typelevel'
 
 import { SYMBOL_LOG, SYMBOL_STATE, log, state } from '../src'
 
-import { assert } from 'chai'
+import { assert, describe, it } from 'vitest'
 
 describe('email', () => {
   it('initial', () => {
@@ -51,10 +51,8 @@ describe('email', () => {
     const test = email().to('john.doe@example.com')
 
     const _log: [ActionTo<'john.doe@example.com'>] = log(test)
-    const _state: $.Assign<
-      InitialState,
-      { to: 'john.doe@example.com' }
-    > = state(test)
+    const _state: $.Assign<InitialState, { to: 'john.doe@example.com' }> =
+      state(test)
 
     assert.isObject(test)
     assert.hasAllKeys(test, ['subject', 'plugin', SYMBOL_LOG, SYMBOL_STATE])
@@ -281,9 +279,7 @@ describe('email', () => {
       .cc('justin.doe@example.com')
 
     const _log: Array<
-      | ActionBody<
-          'Totam est perferendis provident consequatur et harum autem.'
-        >
+      | ActionBody<'Totam est perferendis provident consequatur et harum autem.'>
       | ActionCC<'jane.doe@example.com'>
       | ActionCC<'justin.doe@example.com'>
       | ActionPlugin<Array<typeof SYMBOL_ATTACHMENT | typeof SYMBOL_CC>>
@@ -350,9 +346,7 @@ describe('email', () => {
 
     const _log: Array<
       | ActionAttachment
-      | ActionBody<
-          'Totam est perferendis provident consequatur et harum autem.'
-        >
+      | ActionBody<'Totam est perferendis provident consequatur et harum autem.'>
       | ActionPlugin<Array<typeof SYMBOL_ATTACHMENT | typeof SYMBOL_CC>>
       | ActionSubject<'Hello World'>
       | ActionTo<'john.doe@example.com'>
