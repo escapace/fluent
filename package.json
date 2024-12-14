@@ -8,30 +8,29 @@
   },
   "bugs": "https://github.com/escapace/fluent/issues",
   "dependencies": {
-    "@escapace/typelevel": "^2.0.0",
-    "lodash-es": "^4.17.21"
+    "@escapace/typelevel": "^2.0.2"
   },
   "devDependencies": {
-    "@commitlint/cli": "19.2.1",
-    "@commitlint/config-conventional": "19.1.0",
-    "@escapace/pnpm-pack": "0.2.0",
+    "@commitlint/cli": "19.6.0",
+    "@commitlint/config-conventional": "19.6.0",
+    "@escapace/pnpm-pack": "0.5.4",
     "@ls-lint/ls-lint": "2.2.3",
     "@types/lodash-es": "4.17.12",
-    "@vitest/coverage-v8": "1.6.0",
-    "eslint": "9.0.0",
-    "eslint-config-escapace": "5.0.9",
-    "esroll": "0.1.0",
-    "knip": "5.12.2",
-    "lefthook": "1.6.10",
-    "prettier": "3.2.5",
-    "prettier-config-escapace": "1.0.6",
-    "syncpack": "12.3.0",
-    "tsx": "4.9.1",
-    "typescript": "5.4.3",
-    "vitest": "1.6.0"
+    "@vitest/coverage-v8": "2.1.8",
+    "eslint": "9.17.0",
+    "eslint-config-escapace": "5.4.1",
+    "esroll": "0.3.1",
+    "knip": "5.40.0",
+    "lefthook": "1.9.2",
+    "prettier": "3.4.2",
+    "prettier-config-escapace": "1.2.1",
+    "syncpack": "13.0.0",
+    "tsx": "4.19.2",
+    "typescript": "5.7.2",
+    "vitest": "2.1.8"
   },
   "engines": {
-    "pnpm": ">=9.0.6"
+    "pnpm": ">=9.14.4"
   },
   "exports": {
     ".": {
@@ -54,9 +53,12 @@
   "repository": "escapace/fluent",
   "scripts": {
     "build": "tsx scripts/build.ts",
-    "lint": "ls-lint --config .ls-lint.yaml && knip && eslint",
+    "format": "syncpack format && eslint --no-warn-ignored --fix && prettier -uw .",
+    "lint": "ls-lint --config .ls-lint.yaml && knip --no-config-hints && eslint",
+    "ls-lint": "ls-lint --config .ls-lint.yaml",
     "pack": "pnpm-pack package --pack-destination lib",
     "prepare": "lefthook install",
+    "syncpack": "syncpack fix-mismatches && syncpack set-semver-ranges && syncpack format",
     "test": "vitest --no-watch --coverage",
     "typecheck": "tsc --noEmit"
   },

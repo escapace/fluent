@@ -21,31 +21,27 @@ declare module './types' {
   }
 
   export interface Email<T> {
-    plugin<
-      A extends Types<Settings>,
-      B extends Types<Settings>,
-      C extends Types<Settings>
-    >(
+    plugin<A extends Types<Settings>, B extends Types<Settings>, C extends Types<Settings>>(
       A: Plugin<A, Settings>,
       B: Plugin<B, Settings>,
-      C: Plugin<C, Settings>
+      C: Plugin<C, Settings>,
     ): Next<Settings, T, ActionPlugin<Array<A | B | C>>>
 
     plugin<
       A extends Types<Settings>,
       B extends Types<Settings>,
       C extends Types<Settings>,
-      D extends Types<Settings>
+      D extends Types<Settings>,
     >(
       A: Plugin<A, Settings>,
       B: Plugin<B, Settings>,
       C: Plugin<C, Settings>,
-      D: Plugin<D, Settings>
+      D: Plugin<D, Settings>,
     ): Next<Settings, T, ActionPlugin<Array<A | B | C | D>>>
 
     plugin<A extends Types<Settings>, B extends Types<Settings>>(
       A: Plugin<A, Settings>,
-      B: Plugin<B, Settings>
+      B: Plugin<B, Settings>,
     ): Next<Settings, T, ActionPlugin<Array<A | B>>>
 
     plugin<U extends Types<Settings>>(

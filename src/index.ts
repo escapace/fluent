@@ -1,3 +1,6 @@
+/* eslint-disable typescript/no-unsafe-function-type */
+/* eslint-disable typescript/no-unsafe-call */
+/* eslint-disable typescript/no-empty-object-type */
 /* eslint-disable typescript/no-unsafe-return */
 /* eslint-disable typescript/no-unsafe-member-access */
 /* eslint-disable typescript/no-unsafe-assignment */
@@ -5,14 +8,26 @@
 /* eslint-disable typescript/no-explicit-any */
 import type $ from '@escapace/typelevel'
 
-import {
-  isBoolean,
-  isFunction,
-  isNumber,
-  isPlainObject,
-  isString,
-  isSymbol
-} from 'lodash-es'
+const isBoolean = (value: any): value is boolean => typeof value === 'boolean'
+const isFunction = (value: any): value is Function => typeof value === 'function'
+const isNumber = (value: any): value is number => typeof value === 'number' && !isNaN(value)
+function isPlainObject(value: any): value is object {
+  if (typeof value !== 'object' || value === null) return false
+
+  if (Object.prototype.toString.call(value) !== '[object Object]') return false
+
+  const proto = Object.getPrototypeOf(value)
+  if (proto === null) return true
+
+  const Ctor = Object.prototype.hasOwnProperty.call(proto, 'constructor') && proto.constructor
+  return (
+    typeof Ctor === 'function' &&
+    Ctor instanceof Ctor &&
+    Function.prototype.call(Ctor) === Function.prototype.call(value)
+  )
+}
+const isString = (value: any): value is string => typeof value === 'string'
+const isSymbol = (value: any): value is symbol => typeof value === 'symbol'
 
 export interface Action<T extends number | string | symbol = any, U = any> {
   payload: U
@@ -35,7 +50,7 @@ export enum Options {
   Enabled,
   Dependencies,
   Conflicts,
-  Specification
+  Specification,
 }
 
 export interface Settings {
@@ -62,11 +77,7 @@ export type Check<T extends Model, S> = S extends Specification
           | $.If<
               $.Is.Never<S[Options.Dependencies]>,
               $.True,
-              $.If<
-                $.Is.Unknown<X>,
-                $.False,
-                $.Contains<X, S[Options.Dependencies]>
-              >
+              $.If<$.Is.Unknown<X>, $.False, $.Contains<X, S[Options.Dependencies]>>
             >
           | $.If<
               $.Or<$.Is.Never<S[Options.Conflicts]>, $.Is.Unknown<X>>,
@@ -99,9 +110,7 @@ export type Instance<S extends Settings, T extends Model> = Fluent<
 export type Reducer<T extends Settings, U extends Action[]> = $.Assign<
   T[Options.InitialState],
   $.Cast<
-    $.To.Intersection<
-      $.Properties<$.Type<T[Options.Reducer], U>, $.Values<U>['type'], {}>
-    >,
+    $.To.Intersection<$.Properties<$.Type<T[Options.Reducer], U>, $.Values<U>['type'], {}>>,
     {}
   >
 >
@@ -114,24 +123,18 @@ export interface Log<T extends Settings, U extends Action[]> {
 export type Next<
   S extends Settings,
   T extends Model = { log: never; state: never },
-  U extends Action = never
-> = Instance<
-  S,
-  Log<S, $.If<$.Is.Never<$.Values<T['log']>>, [U], [U, ...T['log']]>>
->
+  U extends Action = never,
+> = Instance<S, Log<S, $.If<$.Is.Never<$.Values<T['log']>>, [U], [U, ...T['log']]>>>
 
 export type Payload<T extends Action, U extends T['type'], E = never> =
   T extends Action<U, infer P> ? P : E
 
-export type Types<T extends Settings> = keyof $.Type<
-  T[Options.Specification],
-  Model
->
+export type Types<T extends Settings> = keyof $.Type<T[Options.Specification], Model>
 
 export interface Plugin<
   Z extends Types<T>,
   T extends Settings,
-  U extends number | string | symbol = Types<T>
+  U extends number | string | symbol = Types<T>,
 > {
   [Options.Interface]: (
     dispatch: <A extends Action<U>, B extends Types<T> = Types<T>>(
@@ -139,18 +142,13 @@ export interface Plugin<
       ...plugins: Array<Plugin<B, T>>
     ) => void,
     log: Array<Action<U>>,
-    state: T[Options.State]
+    state: T[Options.State],
   ) => {}
   [Options.Once]: boolean
   [Options.Type]: Z
   [Options.Conflicts]?: U[]
-  [Options.Dependencies]?:
-    | ((log: Array<Action<U>>, state: T[Options.State]) => U[])
-    | U[]
-  [Options.Enabled]?: (
-    log: Array<Action<U>>,
-    state: T[Options.State]
-  ) => boolean
+  [Options.Dependencies]?: ((log: Array<Action<U>>, state: T[Options.State]) => U[]) | U[]
+  [Options.Enabled]?: (log: Array<Action<U>>, state: T[Options.State]) => boolean
   [Options.InitialState]?: Partial<T[Options.State]>
   [Options.Keys]?: Array<number | string | symbol>
   [Options.Reducer]?: (log: Array<Action<U>>) => Partial<T[Options.State]>
@@ -165,34 +163,13 @@ export interface FluentInterface<T extends Model> {
 }
 
 export const log = <T>(fluent: { [SYMBOL_LOG]: T }): T => fluent[SYMBOL_LOG]
-export const state = <T>(fluent: { [SYMBOL_STATE]: T }): T =>
-  fluent[SYMBOL_STATE]
+export const state = <T>(fluent: { [SYMBOL_STATE]: T }): T => fluent[SYMBOL_STATE]
 
 const isType = <T extends number | string | symbol>(value: T): boolean =>
   isString(value) || isNumber(value) || isSymbol(value)
 
-const every = <T>(collection: T[], predicate: (value: T) => boolean): boolean =>
-  collection.filter(predicate).length === collection.length
-
-const some = <T>(
-  collection: T[],
-  predicate: (value: T) => boolean
-): boolean => {
-  let current = 0
-
-  while (current < collection.length) {
-    if (predicate(collection[current])) {
-      return true
-    }
-
-    ++current
-  }
-
-  return false
-}
-
 const normalize = <T extends Settings>(
-  records: Array<Plugin<Types<T>, T>>
+  records: Array<Plugin<Types<T>, T>>,
 ): Array<Required<Plugin<Types<T>, T>>> =>
   records.map((record) => ({
     [Options.Conflicts]: [],
@@ -201,7 +178,7 @@ const normalize = <T extends Settings>(
     [Options.InitialState]: {},
     [Options.Keys]: [],
     [Options.Reducer]: () => ({}),
-    ...record
+    ...record,
   }))
 
 interface LocalState<T extends Settings> {
@@ -213,7 +190,7 @@ interface LocalState<T extends Settings> {
 }
 
 const normalizeRecords = <T extends Settings>(
-  value: Array<Plugin<Types<T>, T>>
+  value: Array<Plugin<Types<T>, T>>,
 ): Array<Required<Plugin<Types<T>, T>>> => {
   const records: Array<Required<Plugin<Types<T>, T>>> = normalize(value)
 
@@ -224,9 +201,7 @@ const normalizeRecords = <T extends Settings>(
 
     if (!isBoolean(record[Options.Once])) {
       throw new Error(
-        `Not valid [Options.Once] in the ${String(
-          record[Options.Type]
-        )} specification`
+        `Not valid [Options.Once] in the ${String(record[Options.Type])} specification`,
       )
     }
 
@@ -234,48 +209,35 @@ const normalizeRecords = <T extends Settings>(
       !(
         isFunction(record[Options.Dependencies]) ||
         (Array.isArray(record[Options.Dependencies]) &&
-          every(
-            record[Options.Dependencies] as Array<number | string | symbol>,
-            isType
-          ))
+          (record[Options.Dependencies] as Array<number | string | symbol>).every(isType))
       )
     ) {
       throw new Error(
-        `Not valid [Options.Dependencies] in the ${String(
-          record[Options.Type]
-        )} specification`
+        `Not valid [Options.Dependencies] in the ${String(record[Options.Type])} specification`,
       )
     }
 
-    if (!every(record[Options.Conflicts], isType)) {
+    if (!record[Options.Conflicts].every(isType)) {
       throw new Error(
-        `Not valid [Options.Conflicts] in the ${String(
-          record[Options.Type]
-        )} specification`
+        `Not valid [Options.Conflicts] in the ${String(record[Options.Type])} specification`,
       )
     }
 
     if (!isFunction(record[Options.Enabled])) {
       throw new Error(
-        `Not valid [Options.Enabled] in the ${String(
-          record[Options.Type]
-        )} specification`
+        `Not valid [Options.Enabled] in the ${String(record[Options.Type])} specification`,
       )
     }
 
     if (!isFunction(record[Options.Reducer])) {
       throw new Error(
-        `Not valid [Options.Reducer] in the ${String(
-          record[Options.Type]
-        )} specification`
+        `Not valid [Options.Reducer] in the ${String(record[Options.Type])} specification`,
       )
     }
 
     if (!isPlainObject(record[Options.InitialState])) {
       throw new Error(
-        `Not valid [Options.InitialState] in the ${String(
-          record[Options.Type]
-        )} specification`
+        `Not valid [Options.InitialState] in the ${String(record[Options.Type])} specification`,
       )
     }
   })
@@ -285,24 +247,17 @@ const normalizeRecords = <T extends Settings>(
 
 const tests = <T extends Settings>(
   state: LocalState<T>,
-  record: Required<Plugin<Types<T>, T>>
+  record: Required<Plugin<Types<T>, T>>,
 ): Array<() => boolean> => [
   () =>
-    every(
-      isFunction(record[Options.Dependencies])
-        ? (record[Options.Dependencies] as Function)(state.log, state.state)
-        : record[Options.Dependencies],
-      (type) => some(state.log, (action) => action.type === type)
-    ),
+    (isFunction(record[Options.Dependencies])
+      ? (record[Options.Dependencies] as Function)(state.log, state.state)
+      : record[Options.Dependencies]
+    ).every((type: number | string | symbol) => state.log.some((action) => action.type === type)),
   () => record[Options.Enabled](state.log, state.state),
   () =>
-    record[Options.Once]
-      ? !some(state.log, (action) => action.type === record[Options.Type])
-      : true,
-  () =>
-    !some(record[Options.Conflicts], (type) =>
-      some(state.log, (action) => action.type === type)
-    )
+    record[Options.Once] ? !state.log.some((action) => action.type === record[Options.Type]) : true,
+  () => !record[Options.Conflicts].some((type) => state.log.some((action) => action.type === type)),
 ]
 
 const interfaces = <T extends Settings>(state: LocalState<T>): {} => {
@@ -310,26 +265,25 @@ const interfaces = <T extends Settings>(state: LocalState<T>): {} => {
     (record) =>
       !tests(state, record).reduce<boolean>(
         (previous, current) => (previous ? current() : false),
-        true
-      )
+        true,
+      ),
   )
 
   const enabled = state.records.filter((record) => !disabled.includes(record))
 
   const keys: Array<number | string | symbol> = disabled.reduce(
-    (previous: Array<number | string | symbol>, record) =>
-      previous.concat(record[Options.Keys]),
-    []
+    (previous: Array<number | string | symbol>, record) => previous.concat(record[Options.Keys]),
+    [],
   )
 
   const combinedInterfaces = Object.assign(
     {
       [SYMBOL_LOG]: state.log,
-      [SYMBOL_STATE]: state.state
+      [SYMBOL_STATE]: state.state,
     },
     ...enabled.map((record) =>
-      record[Options.Interface](dispatchFactory(state), state.log, state.state)
-    )
+      record[Options.Interface](dispatchFactory(state), state.log, state.state),
+    ),
   )
 
   Object.keys(combinedInterfaces)
@@ -346,9 +300,7 @@ const dispatchFactory =
   <T extends Settings>(_state: LocalState<T>) =>
   (action?: Action, ...plugins: Array<Plugin<Types<T>, T>>) => {
     const state =
-      plugins.length !== 0
-        ? register(normalizeRecords(plugins), { ..._state })
-        : { ..._state }
+      plugins.length !== 0 ? register(normalizeRecords(plugins), { ..._state }) : { ..._state }
 
     if (action !== undefined) {
       if (isPlainObject(action) && isType(action.type)) {
@@ -361,7 +313,7 @@ const dispatchFactory =
     state.state = Object.assign(
       {},
       state.initialState,
-      ...state.reducers.map((reducer) => reducer(state.log))
+      ...state.reducers.map((reducer) => reducer(state.log)),
     )
 
     return interfaces(state)
@@ -369,7 +321,7 @@ const dispatchFactory =
 
 const register = <T extends Settings>(
   records: Array<Required<Plugin<Types<T>, T>>>,
-  state: LocalState<T>
+  state: LocalState<T>,
 ): LocalState<T> => {
   records.forEach((record) => {
     state.records = [...state.records, record]
@@ -381,7 +333,7 @@ const register = <T extends Settings>(
 
   state.initialState = Object.assign(
     {},
-    ...state.records.map((record) => record[Options.InitialState])
+    ...state.records.map((record) => record[Options.InitialState]),
   )
 
   return state
@@ -392,16 +344,12 @@ const initialLocalStateFactory = <T extends Settings>(): LocalState<T> => ({
   log: [],
   records: [],
   reducers: [],
-  state: {}
+  state: {},
 })
 
-export const builder = <T extends Settings>(
-  value: Array<Plugin<Types<T>, T>>
-): (() => Next<T>) => {
+export const builder = <T extends Settings>(value: Array<Plugin<Types<T>, T>>): (() => Next<T>) => {
   const normalized = normalizeRecords(value)
 
   return () =>
-    dispatchFactory(
-      register(normalized, initialLocalStateFactory())
-    )() as unknown as Next<T>
+    dispatchFactory(register(normalized, initialLocalStateFactory()))() as unknown as Next<T>
 }

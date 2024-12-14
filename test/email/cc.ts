@@ -36,10 +36,7 @@ declare module './types' {
     [SYMBOL_CC]: {
       [Options.Conflicts]: typeof SYMBOL_SEND
       [Options.Dependencies]: typeof SYMBOL_TO
-      [Options.Enabled]: $.Contains<
-        $.Values<T['state']['plugins']>,
-        typeof SYMBOL_CC
-      >
+      [Options.Enabled]: $.Contains<$.Values<T['state']['plugins']>, typeof SYMBOL_CC>
       [Options.Keys]: 'cc'
       [Options.Once]: $.False
       [Options.Type]: typeof SYMBOL_CC
@@ -53,15 +50,15 @@ export const cc: Plugin<typeof SYMBOL_CC, Settings> = {
   [Options.Interface]: (dispatch) => ({
     cc<T extends string>(value: T) {
       return dispatch<ActionCC<T>>({ payload: value, type: SYMBOL_CC })
-    }
+    },
   }),
   [Options.Keys]: ['cc'],
   [Options.Once]: false,
   [Options.Reducer]: (log) => ({
     cc: map(
       filter(log, (action) => action.type === SYMBOL_CC),
-      (action) => action.payload
-    )
+      (action) => action.payload,
+    ),
   }),
-  [Options.Type]: SYMBOL_CC
+  [Options.Type]: SYMBOL_CC,
 }

@@ -8,7 +8,7 @@ import {
   SYMBOL_BODY,
   SYMBOL_SEND,
   SYMBOL_SUBJECT,
-  SYMBOL_TO
+  SYMBOL_TO,
 } from './email/types'
 
 import { type ActionCC, SYMBOL_CC } from './email/cc'
@@ -43,7 +43,7 @@ describe('email', () => {
       plugins: [],
       sent: false,
       subject: undefined,
-      to: undefined
+      to: undefined,
     })
   })
 
@@ -51,8 +51,7 @@ describe('email', () => {
     const test = email().to('john.doe@example.com')
 
     const _log: [ActionTo<'john.doe@example.com'>] = log(test)
-    const _state: $.Assign<InitialState, { to: 'john.doe@example.com' }> =
-      state(test)
+    const _state: $.Assign<InitialState, { to: 'john.doe@example.com' }> = state(test)
 
     assert.isObject(test)
     assert.hasAllKeys(test, ['subject', 'plugin', SYMBOL_LOG, SYMBOL_STATE])
@@ -60,29 +59,24 @@ describe('email', () => {
     assert.lengthOf(_log, 1)
     assert.deepInclude(_log, {
       payload: 'john.doe@example.com',
-      type: SYMBOL_TO
+      type: SYMBOL_TO,
     })
     assert.deepEqual(_state, {
       body: undefined,
       plugins: [],
       sent: false,
       subject: undefined,
-      to: 'john.doe@example.com'
+      to: 'john.doe@example.com',
     })
   })
 
   it('stage 2', () => {
     const test = email().to('john.doe@example.com').subject('Hello World')
 
-    const _log: [
-      ActionSubject<'Hello World'>,
-      ActionTo<'john.doe@example.com'>
-    ] = log(test)
+    const _log: [ActionSubject<'Hello World'>, ActionTo<'john.doe@example.com'>] = log(test)
 
-    const _state: $.Assign<
-      InitialState,
-      { subject: 'Hello World'; to: 'john.doe@example.com' }
-    > = state(test)
+    const _state: $.Assign<InitialState, { subject: 'Hello World'; to: 'john.doe@example.com' }> =
+      state(test)
 
     assert.isObject(test)
     assert.hasAllKeys(test, ['body', 'plugin', SYMBOL_LOG, SYMBOL_STATE])
@@ -90,14 +84,14 @@ describe('email', () => {
     assert.lengthOf(_log, 2)
     assert.deepInclude(_log, {
       payload: 'Hello World',
-      type: SYMBOL_SUBJECT
+      type: SYMBOL_SUBJECT,
     })
     assert.deepEqual(_state, {
       body: undefined,
       plugins: [],
       sent: false,
       subject: 'Hello World',
-      to: 'john.doe@example.com'
+      to: 'john.doe@example.com',
     })
   })
 
@@ -110,7 +104,7 @@ describe('email', () => {
     const _log: [
       ActionBody<'Totam est perferendis provident consequatur et harum autem.'>,
       ActionSubject<'Hello World'>,
-      ActionTo<'john.doe@example.com'>
+      ActionTo<'john.doe@example.com'>,
     ] = log(test)
 
     const _state: $.Assign<
@@ -128,14 +122,14 @@ describe('email', () => {
     assert.lengthOf(_log, 3)
     assert.deepInclude(_log, {
       payload: 'Totam est perferendis provident consequatur et harum autem.',
-      type: SYMBOL_BODY
+      type: SYMBOL_BODY,
     })
     assert.deepEqual(_state, {
       body: 'Totam est perferendis provident consequatur et harum autem.',
       plugins: [],
       sent: false,
       subject: 'Hello World',
-      to: 'john.doe@example.com'
+      to: 'john.doe@example.com',
     })
   })
 
@@ -150,7 +144,7 @@ describe('email', () => {
       ActionSend,
       ActionBody<'Totam est perferendis provident consequatur et harum autem.'>,
       ActionSubject<'Hello World'>,
-      ActionTo<'john.doe@example.com'>
+      ActionTo<'john.doe@example.com'>,
     ] = log(test)
     const _state: $.Assign<
       InitialState,
@@ -167,14 +161,14 @@ describe('email', () => {
     assert.lengthOf(_log, 4)
     assert.deepInclude(_log, {
       payload: true,
-      type: SYMBOL_SEND
+      type: SYMBOL_SEND,
     })
     assert.deepEqual(_state, {
       body: 'Totam est perferendis provident consequatur et harum autem.',
       plugins: [],
       sent: true,
       subject: 'Hello World',
-      to: 'john.doe@example.com'
+      to: 'john.doe@example.com',
     })
   })
 
@@ -189,7 +183,7 @@ describe('email', () => {
       ActionSend,
       ActionBody<'Totam est perferendis provident consequatur et harum autem.'>,
       ActionSubject<'Hello World'>,
-      ActionTo<'john.doe@example.com'>
+      ActionTo<'john.doe@example.com'>,
     ] = log(test)
     const _state: $.Assign<
       InitialState,
@@ -206,14 +200,14 @@ describe('email', () => {
     assert.lengthOf(_log, 4)
     assert.deepInclude(_log, {
       payload: true,
-      type: SYMBOL_SEND
+      type: SYMBOL_SEND,
     })
     assert.deepEqual(_state, {
       body: 'Totam est perferendis provident consequatur et harum autem.',
       plugins: [],
       sent: true,
       subject: 'Hello World',
-      to: 'john.doe@example.com'
+      to: 'john.doe@example.com',
     })
   })
 
@@ -228,7 +222,7 @@ describe('email', () => {
       ActionPlugin<Array<typeof SYMBOL_ATTACHMENT | typeof SYMBOL_CC>>,
       ActionBody<'Totam est perferendis provident consequatur et harum autem.'>,
       ActionSubject<'Hello World'>,
-      ActionTo<'john.doe@example.com'>
+      ActionTo<'john.doe@example.com'>,
     ] = log(test)
 
     const _state: $.Assign<
@@ -243,21 +237,14 @@ describe('email', () => {
     > = state(test)
 
     assert.isObject(test)
-    assert.hasAllKeys(test, [
-      'send',
-      'plugin',
-      'attachment',
-      'cc',
-      SYMBOL_LOG,
-      SYMBOL_STATE
-    ])
+    assert.hasAllKeys(test, ['send', 'plugin', 'attachment', 'cc', SYMBOL_LOG, SYMBOL_STATE])
     assert.isFunction(test.send)
     assert.isFunction(test.attachment)
     assert.isFunction(test.cc)
     assert.lengthOf(_log, 4)
     assert.deepInclude(_log, {
       payload: [SYMBOL_CC, SYMBOL_ATTACHMENT],
-      type: SYMBOL_PLUGIN
+      type: SYMBOL_PLUGIN,
     })
     assert.deepEqual(_state, {
       body: 'Totam est perferendis provident consequatur et harum autem.',
@@ -265,7 +252,7 @@ describe('email', () => {
       plugins: [SYMBOL_CC, SYMBOL_ATTACHMENT],
       sent: false,
       subject: 'Hello World',
-      to: 'john.doe@example.com'
+      to: 'john.doe@example.com',
     })
   })
 
@@ -299,14 +286,7 @@ describe('email', () => {
     > = state(test)
 
     assert.isObject(test)
-    assert.hasAllKeys(test, [
-      'send',
-      'plugin',
-      'attachment',
-      'cc',
-      SYMBOL_LOG,
-      SYMBOL_STATE
-    ])
+    assert.hasAllKeys(test, ['send', 'plugin', 'attachment', 'cc', SYMBOL_LOG, SYMBOL_STATE])
     assert.isFunction(test.send)
     assert.isFunction(test.attachment)
     assert.isFunction(test.cc)
@@ -314,12 +294,12 @@ describe('email', () => {
 
     assert.deepInclude(_log, {
       payload: 'jane.doe@example.com',
-      type: SYMBOL_CC
+      type: SYMBOL_CC,
     })
 
     assert.deepInclude(_log, {
       payload: 'justin.doe@example.com',
-      type: SYMBOL_CC
+      type: SYMBOL_CC,
     })
 
     assert.deepEqual(_state, {
@@ -328,7 +308,7 @@ describe('email', () => {
       plugins: [SYMBOL_CC, SYMBOL_ATTACHMENT],
       sent: false,
       subject: 'Hello World',
-      to: 'john.doe@example.com'
+      to: 'john.doe@example.com',
     })
   })
 
@@ -364,14 +344,7 @@ describe('email', () => {
     > = state(test)
 
     assert.isObject(test)
-    assert.hasAllKeys(test, [
-      'send',
-      'plugin',
-      'attachment',
-      'cc',
-      SYMBOL_LOG,
-      SYMBOL_STATE
-    ])
+    assert.hasAllKeys(test, ['send', 'plugin', 'attachment', 'cc', SYMBOL_LOG, SYMBOL_STATE])
 
     assert.isFunction(test.send)
     assert.isFunction(test.attachment)
@@ -380,12 +353,12 @@ describe('email', () => {
 
     assert.deepInclude(_log, {
       payload: attachment1,
-      type: SYMBOL_ATTACHMENT
+      type: SYMBOL_ATTACHMENT,
     })
 
     assert.deepInclude(_log, {
       payload: attachment2,
-      type: SYMBOL_ATTACHMENT
+      type: SYMBOL_ATTACHMENT,
     })
 
     assert.deepEqual(_state, {
@@ -394,7 +367,7 @@ describe('email', () => {
       plugins: [SYMBOL_CC, SYMBOL_ATTACHMENT],
       sent: false,
       subject: 'Hello World',
-      to: 'john.doe@example.com'
+      to: 'john.doe@example.com',
     })
   })
 })

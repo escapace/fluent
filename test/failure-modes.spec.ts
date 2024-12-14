@@ -4,12 +4,7 @@ import { assert, describe, it } from 'vitest'
 import { noop } from 'lodash-es'
 import { builder, log, Options, SYMBOL_LOG, SYMBOL_STATE, state } from '../src'
 import { email } from './email'
-import {
-  type ActionTo,
-  type InitialState,
-  type Settings,
-  SYMBOL_TO
-} from './email/types'
+import { type ActionTo, type InitialState, type Settings, SYMBOL_TO } from './email/types'
 
 describe('failure-modes', () => {
   it('mutation', () => {
@@ -20,8 +15,7 @@ describe('failure-modes', () => {
     const test = instance.to('john.doe@example.com')
 
     const _log: Array<ActionTo<'john.doe@example.com'>> = log(test)
-    const _state: $.Assign<InitialState, { to: 'john.doe@example.com' }> =
-      state(test)
+    const _state: $.Assign<InitialState, { to: 'john.doe@example.com' }> = state(test)
 
     assert.isObject(test)
     assert.hasAllKeys(test, ['subject', 'plugin', SYMBOL_LOG, SYMBOL_STATE])
@@ -29,14 +23,14 @@ describe('failure-modes', () => {
     assert.lengthOf(_log, 1)
     assert.deepInclude(_log, {
       payload: 'john.doe@example.com',
-      type: SYMBOL_TO
+      type: SYMBOL_TO,
     })
     assert.deepEqual(_state, {
       body: undefined,
       plugins: [],
       sent: false,
       subject: undefined,
-      to: 'john.doe@example.com'
+      to: 'john.doe@example.com',
     })
   })
 
@@ -47,13 +41,13 @@ describe('failure-modes', () => {
           [Options.Interface]: (_) => ({
             noop() {
               noop()
-            }
+            },
           }),
           [Options.Once]: true,
           // [Options.Keys]: ['to'],
           [Options.Reducer]: () => ({}),
-          [Options.Type]: SYMBOL_TO
-        }
+          [Options.Type]: SYMBOL_TO,
+        },
       ])
 
     assert.doesNotThrow(test)
@@ -66,13 +60,13 @@ describe('failure-modes', () => {
           [Options.Interface]: (_) => ({
             noop() {
               noop()
-            }
+            },
           }),
           [Options.Once]: true,
           // [Options.Keys]: ['to'],
           [Options.Reducer]: () => ({}),
-          [Options.Type]: noop as unknown as typeof SYMBOL_TO
-        }
+          [Options.Type]: noop as unknown as typeof SYMBOL_TO,
+        },
       ])
 
     assert.throws(test, /\[Options.Type\]/)
@@ -85,13 +79,13 @@ describe('failure-modes', () => {
           [Options.Interface]: (_) => ({
             noop() {
               noop()
-            }
+            },
           }),
           [Options.Once]: 'string' as unknown as boolean,
           // [Options.Keys]: ['to'],
           [Options.Reducer]: () => ({}),
-          [Options.Type]: SYMBOL_TO
-        }
+          [Options.Type]: SYMBOL_TO,
+        },
       ])
 
     assert.throws(test, /\[Options.Once\]/)
@@ -105,12 +99,12 @@ describe('failure-modes', () => {
           [Options.Interface]: (_) => ({
             noop() {
               noop()
-            }
+            },
           }),
           [Options.Once]: true,
           [Options.Reducer]: () => ({}),
-          [Options.Type]: SYMBOL_TO
-        }
+          [Options.Type]: SYMBOL_TO,
+        },
       ])
 
     assert.throws(test, /\[Options.Dependencies\]/)
@@ -124,12 +118,12 @@ describe('failure-modes', () => {
           [Options.Interface]: (_) => ({
             noop() {
               noop()
-            }
+            },
           }),
           [Options.Once]: true,
           [Options.Reducer]: () => ({}),
-          [Options.Type]: SYMBOL_TO
-        }
+          [Options.Type]: SYMBOL_TO,
+        },
       ])
 
     assert.throws(test, /\[Options.Conflicts\]/)
@@ -143,12 +137,12 @@ describe('failure-modes', () => {
           [Options.Interface]: (_) => ({
             noop() {
               noop()
-            }
+            },
           }),
           [Options.Once]: true,
           [Options.Reducer]: () => ({}),
-          [Options.Type]: SYMBOL_TO
-        }
+          [Options.Type]: SYMBOL_TO,
+        },
       ])
 
     assert.throws(test, /\[Options.Enabled\]/)
@@ -161,12 +155,12 @@ describe('failure-modes', () => {
           [Options.Interface]: (_) => ({
             noop() {
               noop()
-            }
+            },
           }),
           [Options.Once]: true,
           [Options.Reducer]: 'string' as any,
-          [Options.Type]: SYMBOL_TO
-        }
+          [Options.Type]: SYMBOL_TO,
+        },
       ])
 
     assert.throws(test, /\[Options.Reducer\]/)
@@ -180,11 +174,11 @@ describe('failure-modes', () => {
           [Options.Interface]: (_) => ({
             noop() {
               noop()
-            }
+            },
           }),
           [Options.Once]: true,
-          [Options.Type]: SYMBOL_TO
-        }
+          [Options.Type]: SYMBOL_TO,
+        },
       ])
 
     assert.throws(test, /\[Options.InitialState\]/)
@@ -197,11 +191,11 @@ describe('failure-modes', () => {
           [Options.Interface]: (dispatch) => ({
             to(payload: string) {
               dispatch({ payload, type: noop as unknown as typeof SYMBOL_TO })
-            }
+            },
           }),
           [Options.Once]: true,
-          [Options.Type]: SYMBOL_TO
-        }
+          [Options.Type]: SYMBOL_TO,
+        },
       ])().to('jane.doe@example.com')
 
     assert.throws(test, /FSA/)

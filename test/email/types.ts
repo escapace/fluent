@@ -1,12 +1,5 @@
 import type $ from '@escapace/typelevel'
-import type {
-  Action,
-  FluentInterface,
-  Model,
-  Next,
-  Options,
-  Payload
-} from '../../src'
+import type { Action, FluentInterface, Model, Next, Options, Payload } from '../../src'
 
 export declare const EMAIL_INTERFACE: unique symbol
 export declare const EMAIL_SPECIFICATION: unique symbol

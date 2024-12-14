@@ -8,15 +8,14 @@ const exec = promisify(_exec)
 const dirname = path.resolve(import.meta.dirname, '../')
 process.chdir(dirname)
 
-const packageJSON = JSON.parse(
-  await readFile(path.join(dirname, 'package.json'), 'utf-8')
-) as {
-  dependencies?: Record<string, string>
+const packageJSON = JSON.parse(await readFile(path.join(dirname, 'package.json'), 'utf-8')) as {
   version: string
+  dependencies?: Record<string, string>
+  peerDependencies?: Record<string, string>
 }
 
 const constants = JSON.parse(
-  await readFile(path.join(import.meta.dirname, 'constants.json'), 'utf-8')
+  await readFile(path.join(import.meta.dirname, 'constants.json'), 'utf-8'),
 ) as {
   builds: Record<string, BuildOptions>
 }
@@ -24,7 +23,10 @@ const constants = JSON.parse(
 for (const value of Object.values(constants.builds)) {
   await build({
     absWorkingDir: dirname,
-    external: Object.keys(packageJSON.dependencies ?? []),
+    external: [
+      ...Object.keys(packageJSON.dependencies ?? []),
+      ...Object.keys(packageJSON.peerDependencies ?? []),
+    ],
     sourcemap: true,
     sourcesContent: false,
     splitting: true,
@@ -33,19 +35,19 @@ for (const value of Object.values(constants.builds)) {
     ...value,
     define: {
       __VERSION__: JSON.stringify(packageJSON.version),
-      ...value.define
+      ...value.define,
     },
     rollup: {
       experimentalLogSideEffects: true,
-      ...value.rollup
+      ...value.rollup,
     },
     supported: {
       'const-and-let': true,
-      ...value.supported
-    }
+      ...value.supported,
+    },
   })
 }
 
 await exec(
-  'pnpm exec tsc -p ./tsconfig-build.json --emitDeclarationOnly --declarationDir lib/types'
+  'pnpm exec tsc -p ./tsconfig-build.json --emitDeclarationOnly --declarationDir lib/types',
 )

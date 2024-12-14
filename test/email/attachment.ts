@@ -22,10 +22,7 @@ declare module './types' {
     [SYMBOL_ATTACHMENT]: {
       [Options.Conflicts]: typeof SYMBOL_SEND
       [Options.Dependencies]: typeof SYMBOL_SUBJECT
-      [Options.Enabled]: $.Contains<
-        $.Values<T['state']['plugins']>,
-        typeof SYMBOL_ATTACHMENT
-      >
+      [Options.Enabled]: $.Contains<$.Values<T['state']['plugins']>, typeof SYMBOL_ATTACHMENT>
       [Options.Keys]: 'attachment'
       [Options.Once]: $.False
       [Options.Type]: typeof SYMBOL_ATTACHMENT
@@ -40,11 +37,11 @@ export const attachment: Plugin<typeof SYMBOL_ATTACHMENT, Settings> = {
     attachment(value: Buffer) {
       return dispatch<ActionAttachment>({
         payload: value,
-        type: SYMBOL_ATTACHMENT
+        type: SYMBOL_ATTACHMENT,
       })
-    }
+    },
   }),
   [Options.Keys]: ['attachment'],
   [Options.Once]: false,
-  [Options.Type]: SYMBOL_ATTACHMENT
+  [Options.Type]: SYMBOL_ATTACHMENT,
 }
