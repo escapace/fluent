@@ -22,6 +22,7 @@
     "esroll": "0.3.1",
     "knip": "5.40.0",
     "lefthook": "1.9.2",
+    "lodash-es": "4.17.21",
     "prettier": "3.4.2",
     "prettier-config-escapace": "1.2.1",
     "syncpack": "13.0.0",
