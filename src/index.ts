@@ -91,10 +91,14 @@ type CheckOnce<X, S extends Specification> = $.If<
 type CheckEnabled<S extends Specification> = S[Options.Enabled]
 
 type Checks<X, S extends Specification> =
-  | CheckConflicts<X, S>
-  | CheckDependencies<X, S>
-  | CheckEnabled<S>
+  // -
   | CheckOnce<X, S>
+  // -
+  | CheckDependencies<X, S>
+  // -
+  | CheckConflicts<X, S>
+  // -
+  | CheckEnabled<S>
 
 type Check<T extends Model, S> = S extends Specification
   ? T['log'] extends Array<{ type: infer X }>
@@ -111,15 +115,14 @@ export type Instance<S extends Settings, T extends Model> = Fluent<
   Check<T, $.Properties<$.Type<S[Options.Specification], T>>>
 >
 
-type ReducerNextState<T extends Settings, U extends Action[]> = $.Properties<
-  $.Type<T[Options.Reducer], U>,
-  $.Values<U>['type'],
+type ReducerNextState<T extends Settings, U extends Action[]> = $.Cast<
+  $.To.Intersection<$.Properties<$.Type<T[Options.Reducer], U>, $.Values<U>['type'], {}>>,
   {}
 >
 
 export type Reducer<T extends Settings, U extends Action[]> = $.Assign<
   T[Options.InitialState],
-  $.Cast<$.To.Intersection<ReducerNextState<T, U>>, {}>
+  ReducerNextState<T, U>
 >
 
 export interface Log<T extends Settings, U extends Action[]> {
