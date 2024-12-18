@@ -7,9 +7,6 @@
     "email": "opensource@escapace.com"
   },
   "bugs": "https://github.com/escapace/fluent/issues",
-  "dependencies": {
-    "@escapace/typelevel": "^2.0.2"
-  },
   "devDependencies": {
     "@commitlint/cli": "19.6.0",
     "@commitlint/config-conventional": "19.6.0",
@@ -46,6 +43,9 @@
   "homepage": "https://github.com/escapace/fluent#readme",
   "license": "MPL-2.0",
   "module": "lib/neutral/index.js",
+  "peerDependencies": {
+    "@escapace/typelevel": ">=2.0.2"
+  },
   "private": false,
   "publishConfig": {
     "access": "public",
